@@ -54,8 +54,8 @@ class SolicitudRepositoryImpl(SolicitudRepository):
         session = db.get_session()
         try:
 
-            estudiante = session.query(Usuario).filter(Usuario.numero_identificacion == cedula_estudiante).first()
-            docente = session.query(Usuario).filter(Usuario.numero_identificacion == cedula_docente).first()
+            estudiante = session.query(Usuario).filter(Usuario.numero_identificacion == cedula_estudiante and Usuario.activo == 1).first()
+            docente = session.query(Usuario).filter(Usuario.numero_identificacion == cedula_docente and Usuario.activo == 1).first()
             if estudiante == None:
                 return estudiante
             elif docente == None:

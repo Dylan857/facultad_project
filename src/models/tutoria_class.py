@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Table, Date, Time
+from sqlalchemy import Column, String, ForeignKey, Table, Date, Time, Integer, DateTime, func
 from sqlalchemy.orm import relationship
 from configs.database import Base
 import uuid
@@ -13,6 +13,8 @@ class Tutoria(Base):
     hora_inicio = Column(Time)
     hora_fin = Column(Time)
     asignatura_id = Column(String(50), ForeignKey('asignatura.id'))
+    activo = Column(Integer, default = 1, nullable=False)
+    fecha_reg = Column(DateTime, default=func.current_timestamp())
 
     estudiantes = relationship('Usuario', secondary='estudiante_tutoria', backref='tutorias')
 

@@ -16,3 +16,9 @@ class TutoriaService:
     
     def find_tutorias_by_asignatura(self, asignatura):
         return self.tutoria_repository.find_tutoria_by_asignatura(asignatura)
+    
+    def update_tutoria(self, id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
+        return self.tutoria_repository.update_tutoria(id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+    
+    def delete_tutoria(self, id):
+        return self.tutoria_repository.delete_tutoria(id)

@@ -11,12 +11,12 @@ class TutoriaRepoImpl(TutoriaRepo):
     def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
         session = db.get_session()
 
-        docente = session.query(Usuario).filter(Usuario.id == docente_id).first()
+        docente = session.query(Usuario).filter(Usuario.id == docente_id and Tutoria.activo == 1).first()
 
         new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id)
 
         for estudiante in estudiantes:
-            estudiante = session.query(Usuario).filter(Usuario.id == estudiante).first()
+            estudiante = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
             new_tutoria.estudiantes.append(estudiante)
         
         session.add(new_tutoria)
@@ -27,14 +27,14 @@ class TutoriaRepoImpl(TutoriaRepo):
     
     def get_tutorias(self):
         session = db.get_session()
-        tutorias = session.query(Tutoria).all()
+        tutorias = session.query(Tutoria).filter(Tutoria.activo == 1).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
         return tutorias_list
     
     def find_tutoria_by_docente(self, documento_docente):
         session = db.get_session()
-        docente = session.query(Usuario).filter(Usuario.numero_identificacion == documento_docente).first()
-        tutorias = session.query(Tutoria).filter(Tutoria.docente_id == docente.id).all()
+        docente = session.query(Usuario).filter(Usuario.numero_identificacion == documento_docente and Usuario.activo == 1).first()
+        tutorias = session.query(Tutoria).filter(Tutoria.docente_id == docente.id and Tutoria.activo == 1).all()
 
         tutorias_list = self.tutorias_to_dict(tutorias)
 
@@ -42,14 +42,14 @@ class TutoriaRepoImpl(TutoriaRepo):
     
     def find_tutoria_by_fecha(self, fecha):
         session = db.get_session()
-        tutorias = session.query(Tutoria).filter(Tutoria.fecha == fecha).all()
+        tutorias = session.query(Tutoria).filter(Tutoria.fecha == fecha and Tutoria.activo == 1).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
         return tutorias_list
     
     def find_tutoria_by_asignatura(self, asignatura):
         session = db.get_session()
-        asignatura = session.query(Asignatura).filter(Asignatura.nombre == asignatura).first()
-        tutorias = session.query(Tutoria).filter(Tutoria.asignatura_id == asignatura.id).all()
+        asignatura = session.query(Asignatura).filter(Asignatura.nombre == asignatura and Asignatura.activo == 1).first()
+        tutorias = session.query(Tutoria).filter(Tutoria.asignatura_id == asignatura.id and Tutoria.activo == 1).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
         return tutorias_list
     
@@ -67,7 +67,7 @@ class TutoriaRepoImpl(TutoriaRepo):
     
     def get_docente(self, docente_id):
         session = db.get_session()
-        docente = session.query(Usuario).filter(Usuario.id == docente_id).first()
+        docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
         docente_list = []
         docente_dict = {
             'nombre' : docente.nombre,
@@ -82,7 +82,7 @@ class TutoriaRepoImpl(TutoriaRepo):
 
         session = db.get_session()
         asignatura_list = []
-        asignatura = session.query(Asignatura).filter(Asignatura.id == asignatura_id).first()
+        asignatura = session.query(Asignatura).filter(Asignatura.id == asignatura_id and Asignatura.activo == 1).first()
         asignatura_list.append(asignatura.to_dict())
         return asignatura_list
     
@@ -109,3 +109,40 @@ class TutoriaRepoImpl(TutoriaRepo):
             tutorias_list.append(tutorias_dict)
         
         return tutorias_list
+    
+    def update_tutoria(self, id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
+        session = db.get_session()
+
+        tutoria = session.query(Tutoria).filter(Tutoria.id == id).first()
+
+        if tutoria:
+            tutoria.asignatura_id = docente_id
+            tutoria.fecha = fecha
+            tutoria.hora_inicio = hora_inicio
+            tutoria.hora_fin = hora_fin
+            tutoria.asignatura_id = asignatura_id
+
+            for estudiante in estudiantes:
+                estudiante_encontrado = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
+                tutoria.estudiantes.append(estudiante_encontrado)
+            
+            session.commit()
+            session.close()
+
+            return True
+        else:
+            return False
+        
+    def delete_tutoria(self, id):
+
+        session = db.get_session()
+
+        tutoria = session.query(Tutoria).filter(Tutoria.id == id and Tutoria.activo == 1).first()
+
+        if tutoria:
+            tutoria.activo = 0
+            session.commit()
+            session.close()
+            return True
+        else:
+            return False

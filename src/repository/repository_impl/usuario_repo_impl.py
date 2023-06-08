@@ -19,7 +19,7 @@ class UsuarioRepoImpl(UsuarioRepo):
             password_hashed = self.hashear_password(password)
             new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed)
            
-            carrera_encontrada = session.query(Carrera).filter(Carrera.id == carrera).first()
+            carrera_encontrada = session.query(Carrera).filter(Carrera.id == carrera and Carrera.activo == 1).first()
 
             if carrera_encontrada:
                 new_user.carreras.append(carrera_encontrada)
@@ -42,7 +42,7 @@ class UsuarioRepoImpl(UsuarioRepo):
                 new_user.roles.append(rol_encontrado)
 
             for asignatura in asignaturas:
-                asignatura_encontrada = session.query(Asignatura).filter(Asignatura.id == asignatura).first()
+                asignatura_encontrada = session.query(Asignatura).filter(Asignatura.id == asignatura and Asignatura.activo == 1).first()
                 new_user.asignaturas.append(asignatura_encontrada)
             
             session.add(new_user)
@@ -64,7 +64,7 @@ class UsuarioRepoImpl(UsuarioRepo):
         elif "ROLE_ESTUDIANTE" in rol:
             password_hashed = self.hashear_password(password)
             new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed)
-            carrera_encontrada = session.query(Carrera).filter(Carrera.id == carrera).first()
+            carrera_encontrada = session.query(Carrera).filter(Carrera.id == carrera and Carrera.activo == 1).first()
 
             if carrera_encontrada:
                 new_user.carreras.append(carrera_encontrada)
@@ -87,7 +87,7 @@ class UsuarioRepoImpl(UsuarioRepo):
                 new_user.roles.append(rol_encontrado)
         
             for asignatura in asignaturas:
-                asignatura_encontrada = session.query(Asignatura).filter(Asignatura.id == asignatura).first()
+                asignatura_encontrada = session.query(Asignatura).filter(Asignatura.id == asignatura and Asignatura.activo == 1).first()
                 new_user.asignaturas.append(asignatura_encontrada)
             
             session.add(new_user)
@@ -98,7 +98,7 @@ class UsuarioRepoImpl(UsuarioRepo):
     def login(self, email, password):
         session = db.get_session()
         
-        usuario = session.query(Usuario).filter(Usuario.email == email).first()
+        usuario = session.query(Usuario).filter(Usuario.email == email and Usuario.activo == 1).first()
         
         if usuario and pbkdf2_sha256.verify(password, usuario.password):
             roles = self.get_roles(usuario.email)
@@ -126,7 +126,7 @@ class UsuarioRepoImpl(UsuarioRepo):
     
     def get_users(self):
         session = db.get_session()
-        usuarios = session.query(Usuario).all()
+        usuarios = session.query(Usuario).filter(Usuario.activo == 1).all()
         usuarios_list = []
         for usuario in usuarios:
 
@@ -157,7 +157,7 @@ class UsuarioRepoImpl(UsuarioRepo):
     def get_users_estudiante(self):
         session = db.get_session()
         rol_estudiante = session.query(Rol).filter(Rol.rol == "ROLE_ESTUDIANTE").first()
-        usuarios_estudiante = session.query(Usuario).filter(Usuario.roles.contains(rol_estudiante)).all()
+        usuarios_estudiante = session.query(Usuario).filter(Usuario.roles.contains(rol_estudiante) and Usuario.activo == 1).all()
         usuarios_list = []
         for usuario in usuarios_estudiante:
             roles = self.get_roles_by_usuario(usuario.roles)
@@ -180,7 +180,7 @@ class UsuarioRepoImpl(UsuarioRepo):
     def get_users_admin(self):
         session = db.get_session()
         rol_admin = session.query(Rol).filter(Rol.rol == "ROLE_ADMIN").first()
-        usuarios_admins = session.query(Usuario).filter(Usuario.roles.contains(rol_admin)).all()
+        usuarios_admins = session.query(Usuario).filter(Usuario.roles.contains(rol_admin) and Usuario.activo == 1).all()
         usuarios_list = []
         for usuario in usuarios_admins:
             roles = self.get_roles_by_usuario(usuario.roles)
@@ -200,7 +200,7 @@ class UsuarioRepoImpl(UsuarioRepo):
     def get_users_docentes(self):
         session = db.get_session()
         rol_docente = session.query(Rol).filter(Rol.rol == "ROLE_DOCENTE").first()
-        usuarios_docentes = session.query(Usuario).filter(Usuario.roles.contains(rol_docente)).all()
+        usuarios_docentes = session.query(Usuario).filter(Usuario.roles.contains(rol_docente) and Usuario.activo == 1).all()
         usuarios_list = []
         for usuario in usuarios_docentes:
             roles = self.get_roles_by_usuario(usuario.roles)
@@ -222,7 +222,7 @@ class UsuarioRepoImpl(UsuarioRepo):
 
     def get_roles(self, email):
         session = db.get_session()
-        usuario = session.query(Usuario).filter(Usuario.email == email).first()
+        usuario = session.query(Usuario).filter(Usuario.email == email and Usuario.activo == 1).first()
         roles_list = []
         for rol in usuario.roles:
             roles_dict = {

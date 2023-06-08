@@ -9,3 +9,7 @@ class TutoriaRepo:
         raise NotImplementedError
     def find_tutoria_by_asignatura(self, asignatura):
         raise NotImplementedError
+    def update_tutoria(self, id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
+        raise NotImplementedError
+    def delete_tutoria(self, id):
+        raise NotImplementedError

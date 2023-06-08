@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Table
+from sqlalchemy import Column, String, ForeignKey, DateTime, func, Integer
 from configs.database import Base
 from sqlalchemy.orm import relationship
 import uuid
@@ -11,6 +11,8 @@ class Solicitud(Base):
     estudiante_id = Column(String(50), ForeignKey('usuario.id'))
     docente_id = Column(String(50), ForeignKey('usuario.id'))
     descripcion_solicitud = Column(String(255), nullable=False)
+    activo = Column(Integer, default = 1, nullable=False)
+    fecha_reg = Column(DateTime, default=func.current_timestamp())
 
     estudiante = relationship('Usuario', foreign_keys=[estudiante_id])
     docente = relationship('Usuario', foreign_keys=[docente_id])

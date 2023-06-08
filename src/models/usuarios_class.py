@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Table
+from sqlalchemy import Column, String, ForeignKey, Table, DateTime, func, Integer
 from sqlalchemy.orm import relationship
 from configs.database import Base
 import uuid 
@@ -14,6 +14,8 @@ class Usuario(Base):
     tipo_identificacion = Column(String(5), nullable=False)
     numero_identificacion = Column(String(15), nullable=False)
     password = Column(String(255), nullable=False)
+    fecha_reg = Column(DateTime, default=func.current_timestamp())
+    activo = Column(Integer, default = 1, nullable=False)
 
     carreras = relationship('Carrera', secondary='estudiante_carrera')
     asignaturas = relationship('Asignatura', secondary='docente_asignatura')

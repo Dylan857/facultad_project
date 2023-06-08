@@ -81,3 +81,48 @@ def get_tutoria_by_asignatura(asignatura):
     }
     response['datos'] = tutoria_service.find_tutorias_by_asignatura(asignatura)
     return jsonify(response)
+
+@tutoria.route("/update_tutoria/<string:id>", methods = ['PUT'])
+def update_tutoria(id):
+
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    data = request.get_json()
+    
+    docente_id = data.get('docente_id')
+    fecha = data.get('fecha')
+    hora_inicio = data.get('hora_inicio')
+    hora_fin = data.get('hora_fin')
+    asignatura_id = data.get('asignatura_id')
+    estudiantes = data.get('estudiantes')
+
+    tutoria_edit = tutoria_service.update_tutoria(id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+
+    if tutoria_edit:
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = 'Tutoria no encontrada'
+        return jsonify(response)
+    
+@tutoria.route("/delete_tutoria/<string:id>", methods = ['DELETE'])
+def delete_tutoria(id):
+
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    delete_tutoria = tutoria_service.delete_tutoria(id)
+
+    if delete_tutoria:
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "Tutoria no encontrada"
+        return jsonify(response)
