@@ -9,10 +9,10 @@ class Usuario(Base):
 
     id = Column(String(50), primary_key=True, default=lambda: uuid.uuid4().hex)
     nombre = Column(String(50), nullable=False)
-    email = Column(String(50), nullable=False)
-    celular = Column(String(15), nullable=False)
+    email = Column(String(50), nullable=False, unique=True)
+    celular = Column(String(15), nullable=False, unique=True)
     tipo_identificacion = Column(String(5), nullable=False)
-    numero_identificacion = Column(String(15), nullable=False)
+    numero_identificacion = Column(String(15), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     fecha_reg = Column(DateTime, default=func.current_timestamp())
     activo = Column(Integer, default = 1, nullable=False)

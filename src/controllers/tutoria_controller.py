@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from service.tutoria_service import TutoriaService
 from repository.repository_impl.tutoria_repo_impl import TutoriaRepoImpl
+from sqlalchemy.exc import DataError
 
 tutoria = Blueprint('tutoria', __name__, url_prefix = "/tutoria")
 tutoria_repository = TutoriaRepoImpl()
@@ -14,24 +15,26 @@ def create_tutoria():
         'message' : 'OK',
         'datos' : []
     }
+    try:
 
-    data = request.get_json()
-    
-    docente_id = data.get('docente_id')
-    fecha = data.get('fecha')
-    hora_inicio = data.get('hora_inicio')
-    hora_fin = data.get('hora_fin')
-    asignatura_id = data.get('asignatura_id')
-    estudiantes = data.get('estudiantes')
+        data = request.get_json()
+        
+        docente_id = data.get('docente_id')
+        fecha = data.get('fecha')
+        hora_inicio = data.get('hora_inicio')
+        hora_fin = data.get('hora_fin')
+        asignatura_id = data.get('asignatura_id')
+        estudiantes = data.get('estudiantes')
 
-    new_tutoria = tutoria_service.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+        new_tutoria = tutoria_service.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
 
-    if new_tutoria:
-        return jsonify(response)
-    else:
-        response['status_code'] = 400
-        response['message'] = "Hubo un problema con la consulta"
-        return jsonify(response)
+        if new_tutoria:
+            return jsonify(response)
+        
+    except DataError as e:
+        response['status_code']= 400
+        response['message'] = "Proporcione una fecha o hora valida por favor"
+        return jsonify(response), 400
 
 @tutoria.route("/tutorias")
 def get_tutorias():
@@ -79,7 +82,13 @@ def get_tutoria_by_asignatura(asignatura):
         'message' : 'OK',
         'datos' : []
     }
-    response['datos'] = tutoria_service.find_tutorias_by_asignatura(asignatura)
+    tutorias = tutoria_service.find_tutorias_by_asignatura(asignatura)
+
+    if tutorias:
+        response['datos'] = tutorias
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se econtraron tutorias para esa materia"
     return jsonify(response)
 
 @tutoria.route("/update_tutoria/<string:id>", methods = ['PUT'])
@@ -90,23 +99,28 @@ def update_tutoria(id):
         'message' : 'OK',
         'datos' : []
     }
+    try:
 
-    data = request.get_json()
-    
-    docente_id = data.get('docente_id')
-    fecha = data.get('fecha')
-    hora_inicio = data.get('hora_inicio')
-    hora_fin = data.get('hora_fin')
-    asignatura_id = data.get('asignatura_id')
-    estudiantes = data.get('estudiantes')
+        data = request.get_json()
+        
+        docente_id = data.get('docente_id')
+        fecha = data.get('fecha')
+        hora_inicio = data.get('hora_inicio')
+        hora_fin = data.get('hora_fin')
+        asignatura_id = data.get('asignatura_id')
+        estudiantes = data.get('estudiantes')
 
-    tutoria_edit = tutoria_service.update_tutoria(id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+        tutoria_edit = tutoria_service.update_tutoria(id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
 
-    if tutoria_edit:
-        return jsonify(response)
-    else:
-        response['status_code'] = 404
-        response['message'] = 'Tutoria no encontrada'
+        if tutoria_edit:
+            return jsonify(response)
+        else:
+            response['status_code'] = 404
+            response['message'] = 'Tutoria no encontrada'
+            return jsonify(response)
+    except DataError as e:
+        response['status_code']= 400
+        response['message'] = "Proporcione una fecha o hora valida por favor"
         return jsonify(response)
     
 @tutoria.route("/delete_tutoria/<string:id>", methods = ['DELETE'])

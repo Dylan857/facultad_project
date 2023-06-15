@@ -2,6 +2,10 @@ from flask import Blueprint, jsonify, request
 from service.solicitud_service import SolicitudService
 from repository.repository_impl.solicitud_repo_impl import SolicitudRepositoryImpl
 from configs.database import Database
+from jsonschema.validators import validate
+from jsonschema import ValidationError
+from validate.jsonschema import json_schema_solicitud
+
 
 solicitud = Blueprint('solicitud', __name__, url_prefix='/solicitud')
 solicitud_repository = SolicitudRepositoryImpl()
@@ -43,19 +47,31 @@ def hacer_solicitud():
         'datos' : []
     }
 
-    data = request.get_json()
-    estudiante_id = data.get('cedula_estudiante')
-    docente_id = data.get('cedula_docente')
-    descripcion_solicitud = data.get('descripcion_solicitud')
-    solicitud = solicitud_service.make_a_request(estudiante_id, docente_id, descripcion_solicitud)
+    try:
 
-    if solicitud is None:
-        return jsonify({'error' : 'Cedula no valida'}), 404
-    
+        data = request.get_json()
 
-    if solicitud:
-        return jsonify(response)
-    else:
+        validate(instance=data, schema=json_schema_solicitud)
+
+        estudiante_id = data.get('cedula_estudiante')
+        docente_id = data.get('cedula_docente')
+        descripcion_solicitud = data.get('descripcion_solicitud')
+        solicitud = solicitud_service.make_a_request(estudiante_id, docente_id, descripcion_solicitud)
+
+        if solicitud is None:
+            response['status_code'] = 400,
+            response['message'] = "Cedula no valida"
+            return jsonify(response), 400
+        
+
+        if solicitud:
+            return jsonify(response)
+        else:
+            response['status_code'] = 400
+            response['message'] = "Hubo un problema haciendo la solicitud"
+            return jsonify(response), 400
+        
+    except ValidationError as e:
         response['status_code'] = 400
-        response['message'] = "Hubo un problema haciendo la solicitud"
-        return jsonify(response), 400
+        response['message'] = "Datos introducidos no validos"
+        return jsonify(response)

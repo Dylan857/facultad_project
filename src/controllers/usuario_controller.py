@@ -16,8 +16,16 @@ def get_users():
         'datos' : []
     }
 
-    response['datos'] = usuario_service.get_users()
-    return jsonify(response)
+    usuarios = usuario_service.get_users()
+
+    if usuarios:
+        response['datos'] = usuarios 
+        return jsonify(response)
+
+    else:
+        response['message'] = "No hay resultados a mostrar"
+        return jsonify(response)
+        
 
 
 @usuario.route("/users_estudiante", methods = ['GET'])
@@ -29,8 +37,13 @@ def get_users_estudiante():
         'datos' : []
     }
 
-    response['datos'] = usuario_service.get_user_estudiante()
-    return jsonify(response)
+    usuarios = usuario_service.get_user_estudiante()
+
+    if usuarios:
+        response['datos'] = usuarios
+        return jsonify(response)
+    else:
+        response['message'] = "No hay resultados a mostrar"
 
 @usuario.route("/users_admin", methods = ['GET'])
 def get_users_admin():
@@ -41,7 +54,12 @@ def get_users_admin():
         'datos' : []
     }
 
-    response['datos'] = usuario_service.get_user_admin()
+    usuarios = usuario_service.get_user_admin()
+
+    if usuarios:
+        response['datos'] = usuarios
+    else:
+        response['message'] = "No hay resultados a mostrar"
     return jsonify(response)
 
 @usuario.route("/users_docentes", methods = ['GET'])
@@ -53,5 +71,10 @@ def get_users_docente():
         'datos' : []
     }
 
-    response['datos'] = usuario_service.get_user_docente()
+    usuarios = usuario_service.get_user_docente()
+
+    if usuarios:
+        response['datos'] = usuarios
+    else:
+        response['message'] = "No hay resultados a mostrar"
     return jsonify(response)

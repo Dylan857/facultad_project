@@ -1,9 +1,13 @@
+from sqlalchemy.exc import DataError
 class TutoriaService:
     def __init__(self, tutoria_repository):
         self.tutoria_repository = tutoria_repository
 
     def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
-        return self.tutoria_repository.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+        try:
+            return self.tutoria_repository.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+        except DataError as e:
+            raise e
     
     def get_tutorias(self):
         return self.tutoria_repository.get_tutorias()
@@ -18,7 +22,10 @@ class TutoriaService:
         return self.tutoria_repository.find_tutoria_by_asignatura(asignatura)
     
     def update_tutoria(self, id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
-        return self.tutoria_repository.update_tutoria(id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
-    
+        try:
+            return self.tutoria_repository.update_tutoria(id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+        except DataError as e:
+            raise e
+        
     def delete_tutoria(self, id):
         return self.tutoria_repository.delete_tutoria(id)

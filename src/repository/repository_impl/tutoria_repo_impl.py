@@ -3,27 +3,43 @@ from configs.database import Database
 from models.tutoria_class import Tutoria
 from models.usuarios_class import Usuario
 from models.asignatura_class import Asignatura
+from sqlalchemy.exc import DataError
 
 db = Database()
 
 class TutoriaRepoImpl(TutoriaRepo):
 
     def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
-        session = db.get_session()
 
-        docente = session.query(Usuario).filter(Usuario.id == docente_id and Tutoria.activo == 1).first()
+        try:
+            
+            session = db.get_session()
 
-        new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id)
+            docente_valido = self.validar_docente(docente_id)
 
-        for estudiante in estudiantes:
-            estudiante = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
-            new_tutoria.estudiantes.append(estudiante)
-        
-        session.add(new_tutoria)
-        session.commit()
-        session.close()
+            if docente_valido:
+                return docente_valido
+            
+            estudiante_valido = self.validar_estudiantes(estudiantes)
 
-        return True
+            if estudiante_valido:
+                return estudiante_valido
+
+            docente = session.query(Usuario).filter(Usuario.id == docente_id and Tutoria.activo == 1).first()
+
+            new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id)
+
+            for estudiante in estudiantes:
+                estudiante = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
+                new_tutoria.estudiantes.append(estudiante)
+            
+            session.add(new_tutoria)
+            session.commit()
+            session.close()
+
+            return True
+        except DataError as e:
+            raise e
     
     def get_tutorias(self):
         session = db.get_session()
@@ -111,28 +127,32 @@ class TutoriaRepoImpl(TutoriaRepo):
         return tutorias_list
     
     def update_tutoria(self, id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
-        session = db.get_session()
 
-        tutoria = session.query(Tutoria).filter(Tutoria.id == id).first()
+        try:       
+            session = db.get_session()
 
-        if tutoria:
-            tutoria.asignatura_id = docente_id
-            tutoria.fecha = fecha
-            tutoria.hora_inicio = hora_inicio
-            tutoria.hora_fin = hora_fin
-            tutoria.asignatura_id = asignatura_id
+            tutoria = session.query(Tutoria).filter(Tutoria.id == id).first()
 
-            for estudiante in estudiantes:
-                estudiante_encontrado = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
-                tutoria.estudiantes.append(estudiante_encontrado)
+            if tutoria:
+                tutoria.asignatura_id = docente_id
+                tutoria.fecha = fecha
+                tutoria.hora_inicio = hora_inicio
+                tutoria.hora_fin = hora_fin
+                tutoria.asignatura_id = asignatura_id
+
+                for estudiante in estudiantes:
+                    estudiante_encontrado = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
+                    tutoria.estudiantes.append(estudiante_encontrado)
+                
+                session.commit()
+                session.close()
+
+                return True
+            else:
+                return False
+        except DataError as e:
+            raise e
             
-            session.commit()
-            session.close()
-
-            return True
-        else:
-            return False
-        
     def delete_tutoria(self, id):
 
         session = db.get_session()
@@ -146,3 +166,23 @@ class TutoriaRepoImpl(TutoriaRepo):
             return True
         else:
             return False
+        
+    def validar_docente(self, docente_id):
+        session = db.get_session()
+
+        docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
+
+        if docente == None:
+            error = "docente no encontrado"
+            return error
+        
+
+    def validar_estudiantes(self, estudiantes):
+        session = db.get_session()
+
+        for estudiante in estudiantes:
+            estudiante_encontrado = session.query(Usuario).filter(Usuario.id == estudiante).first()
+
+            if estudiante_encontrado == None:
+                error = "Estudiantes no validos"
+                return error
