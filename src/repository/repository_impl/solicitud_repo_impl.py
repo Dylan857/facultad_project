@@ -1,9 +1,11 @@
+from flask import current_app
 from repository.repository_interface.solicitud_repo import SolicitudRepository
 from models.solicitud_class import Solicitud
 from configs.database import Database
 from models.usuarios_class import Usuario
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import SQLAlchemyError
+from flask_mail import Message
 
 db = Database()
 
@@ -64,6 +66,12 @@ class SolicitudRepositoryImpl(SolicitudRepository):
             solicitud = Solicitud(estudiante.id, docente.id, descripcion_solicitud)
             session.add(solicitud)
             session.commit()
+
+            mail = current_app.extensions['mail']
+            msg = Message("Solicitud de tutoria", sender = "tutoriasingenierias@gmail.com", recipients=[docente.email])
+            msg.body = f"Solicitud enviada por el usuario: {estudiante.email}. Descripcion solicitud: {descripcion_solicitud}"
+            mail.send(msg)
+            
             session.close()
             return True
         except SQLAlchemyError as e:

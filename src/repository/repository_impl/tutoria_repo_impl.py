@@ -1,9 +1,14 @@
+from flask import current_app, render_template
+from flask_mail import Message
 from repository.repository_interface.tutoria_repo import TutoriaRepo
 from configs.database import Database
 from models.tutoria_class import Tutoria
 from models.usuarios_class import Usuario
 from models.asignatura_class import Asignatura
 from sqlalchemy.exc import DataError
+from sqlalchemy import and_
+from datetime import datetime
+
 
 db = Database()
 
@@ -15,6 +20,7 @@ class TutoriaRepoImpl(TutoriaRepo):
             
             session = db.get_session()
 
+            emails = []
             docente_valido = self.validar_docente(docente_id)
 
             if docente_valido:
@@ -24,17 +30,41 @@ class TutoriaRepoImpl(TutoriaRepo):
 
             if estudiante_valido:
                 return estudiante_valido
+            
+            asignatura_valido = self.validar_asignatura(asignatura_id)
 
-            docente = session.query(Usuario).filter(Usuario.id == docente_id and Tutoria.activo == 1).first()
+            if asignatura_valido:
+                return asignatura_valido
+            
+            asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
+
+            docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
 
             new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id)
 
             for estudiante in estudiantes:
                 estudiante = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
                 new_tutoria.estudiantes.append(estudiante)
+                emails.append(estudiante.email)
+            emails.append(docente.email)
             
             session.add(new_tutoria)
+
+            hora_inicio_objeto = datetime.strptime(new_tutoria.hora_inicio, "%H:%M")
+            hora_inicio_12h = hora_inicio_objeto.strftime("%I:%M %p")
+            hora_fin_objeto = datetime.strptime(new_tutoria.hora_fin, "%H:%M")
+            hora_fin_12h = hora_fin_objeto.strftime("%I:%M %p")
+
+            fecha_objeto = datetime.strptime(new_tutoria.fecha, "%Y/%m/%d")
+            fecha_formateada = fecha_objeto.strftime("%d/%m/%Y")
+            
             session.commit()
+
+            mail = current_app.extensions['mail']
+            msg = Message("Tutoria agendada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
+            msg.html = render_template("agendado_tutoria.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
+            mail.send(msg)
+
             session.close()
 
             return True
@@ -131,7 +161,26 @@ class TutoriaRepoImpl(TutoriaRepo):
         try:       
             session = db.get_session()
 
-            tutoria = session.query(Tutoria).filter(Tutoria.id == id).first()
+            emails = []
+            docente_valido = self.validar_docente(docente_id)
+
+            if docente_valido:
+                return docente_valido
+            
+            estudiante_valido = self.validar_estudiantes(estudiantes)
+
+            if estudiante_valido:
+                return estudiante_valido
+            
+            asignatura_valido = self.validar_asignatura(asignatura_id)
+
+            if asignatura_valido:
+                return asignatura_valido
+
+            tutoria = session.query(Tutoria).filter(and_(Tutoria.id == id, Tutoria.activo == 1)).first()
+            docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
+            asignatura = session.query(Asignatura).filter(Asignatura.id == asignatura_id and Asignatura.activo == 1).first()
+            emails.append(docente.email)            
 
             if tutoria:
                 tutoria.asignatura_id = docente_id
@@ -141,10 +190,25 @@ class TutoriaRepoImpl(TutoriaRepo):
                 tutoria.asignatura_id = asignatura_id
 
                 for estudiante in estudiantes:
-                    estudiante_encontrado = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
+                    estudiante_encontrado = session.query(Usuario).filter(and_(Usuario.id == estudiante, Usuario.activo == 1)).first()
                     tutoria.estudiantes.append(estudiante_encontrado)
+                    emails.append(estudiante_encontrado.email)
                 
                 session.commit()
+
+                hora_inicio_objeto = datetime.strptime(hora_inicio, "%H:%M")
+                hora_inicio_12h = hora_inicio_objeto.strftime("%I:%M %p")
+                hora_fin_objeto = datetime.strptime(hora_fin, "%H:%M")
+                hora_fin_12h = hora_fin_objeto.strftime("%I:%M %p")
+
+                fecha_objeto = datetime.strptime(fecha, "%Y/%m/%d")
+                fecha_formateada = fecha_objeto.strftime("%d/%m/%Y")
+
+                mail = current_app.extensions['mail']
+                msg = Message("Tutoria modificada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
+                msg.html = render_template("tutoria_modificada.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
+                mail.send(msg)
+
                 session.close()
 
                 return True
@@ -157,11 +221,25 @@ class TutoriaRepoImpl(TutoriaRepo):
 
         session = db.get_session()
 
-        tutoria = session.query(Tutoria).filter(Tutoria.id == id and Tutoria.activo == 1).first()
+        tutoria = session.query(Tutoria).filter(and_(Tutoria.id == id and Tutoria.activo == 1)).first()
 
         if tutoria:
+            emails = []
             tutoria.activo = 0
             session.commit()
+
+            asignatura = session.query(Asignatura).filter(and_(Asignatura.id == tutoria.asignatura_id, Asignatura.activo == 1)).first()
+            hora_inicio_12h = tutoria.hora_inicio.strftime("%I:%M %p")
+            hora_fin_12h = tutoria.hora_fin.strftime("%I:%M %p")
+
+            fecha_formateada = tutoria.fecha.strftime("%d/%m/%Y")
+            for estudiante in tutoria.estudiantes:
+                emails.append(estudiante.email)
+
+            mail = current_app.extensions['mail']
+            msg = Message("Tutoria cancelada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
+            msg.html = render_template("tutoria_eliminada.html", hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
+            mail.send(msg)
             session.close()
             return True
         else:
@@ -186,3 +264,11 @@ class TutoriaRepoImpl(TutoriaRepo):
             if estudiante_encontrado == None:
                 error = "Estudiantes no validos"
                 return error
+            
+    def validar_asignatura(self, asignatura_id):
+        session = db.get_session()
+
+        asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
+        if asignatura == None:
+            error = "Asignatura no valida"
+            return error

@@ -2,6 +2,9 @@ from flask import Blueprint, jsonify, request
 from service.tutoria_service import TutoriaService
 from repository.repository_impl.tutoria_repo_impl import TutoriaRepoImpl
 from sqlalchemy.exc import DataError
+from jsonschema.validators import validate
+from jsonschema import ValidationError
+from validate.jsonschema import json_schema_tutoria
 
 tutoria = Blueprint('tutoria', __name__, url_prefix = "/tutoria")
 tutoria_repository = TutoriaRepoImpl()
@@ -18,6 +21,8 @@ def create_tutoria():
     try:
 
         data = request.get_json()
+
+        validate(instance=data, schema=json_schema_tutoria)
         
         docente_id = data.get('docente_id')
         fecha = data.get('fecha')
@@ -28,12 +33,20 @@ def create_tutoria():
 
         new_tutoria = tutoria_service.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
 
-        if new_tutoria:
+        if new_tutoria == True:
             return jsonify(response)
+        elif new_tutoria:
+            response['status_code'] = 400
+            response['message'] = new_tutoria
+            return jsonify(response), 400
         
     except DataError as e:
         response['status_code']= 400
         response['message'] = "Proporcione una fecha o hora valida por favor"
+        return jsonify(response), 400
+    except ValidationError:
+        response['status_code'] = 400
+        response['message'] = "Hubo un problema al agendar la tutoria"
         return jsonify(response), 400
 
 @tutoria.route("/tutorias")
@@ -88,7 +101,7 @@ def get_tutoria_by_asignatura(asignatura):
         response['datos'] = tutorias
     else:
         response['status_code'] = 404
-        response['message'] = "No se econtraron tutorias para esa materia"
+        response['message'] = "No se encontraron tutorias para esa materia"
     return jsonify(response)
 
 @tutoria.route("/update_tutoria/<string:id>", methods = ['PUT'])
