@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Notificación de cita</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            position: relative;
+            border-left: 20px solid rgba(17,29,53,255);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+        
+        .corner-image {
+            width: 35%; /* Ajusta el ancho de la imagen según tus necesidades */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Notificación de modificacion de tutoría</h1>
+        <p>Estimado(a),</p>
+        <p>Lamentamos informarle que la tutoría que tenía agendada para la fecha {{fecha}} ha sido cancelada. No se llevará a cabo la sesión en las horas de inicio: {{hora_inicio}} y fin: {{hora_fin}}, 
+        y la asignatura {{asignatura}} no será tratada en esta ocasión.
+        </p>
+        <p>Si tiene alguna pregunta o requiere más información sobre esta cancelación, por favor no dude en ponerse en contacto con nosotros. Estamos aquí para brindarle el apoyo necesario y responder a cualquier inquietud que pueda tener.</p>
+        <p>Apreciamos su paciencia y cooperación en este proceso. Si desea programar una nueva tutoría o necesita cualquier otro tipo de asistencia, 
+        estaremos encantados de ayudarle en lo que podamos.
+        </p>
+        <p>Agradecemos su paciencia y cooperación en este proceso. Si tiene alguna pregunta o requiere más información, no dude en contactarnos. 
+        Estamos aquí para ayudarle y brindarle el apoyo necesario.
+        </p>
+        <p>Lamentamos nuevamente la cancelación de esta tutoría y esperamos poder brindarle nuestros servicios en el futuro</p>
+        <p>Atentamente,</p>
+        <img src="https://www.unibarranquilla.edu.co/images/logo.png" alt="Imagen" class="corner-image">
+    </div>
+</body>
+</html>

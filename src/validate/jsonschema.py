@@ -30,14 +30,16 @@ json_schema_solicitud = {
 json_schema_tutoria = {
     "type" : "object",
     "properties" : {
-        "docente_id" : {"type" : "string", "maxLength" : 15},
+        "docente_id" : {"type" : "string", "maxLength" : 50},
         "fecha" : {"type" : "string"},
         "hora_inicio" : {"type" : "string"},
         "hora_fin" : {"type" : "string"},
-        "asignatura_id" : {"type" : "string", "maxLength" : 15},
+        "asignatura_id" : {"type" : "string", "maxLength" : 50},
         "estudiantes" : {"type" : "array",
             "items" : {"type" : "string"},
             "minItems" : 1
             }
-    }
+    },
+
+    "required" : ["docente_id", "fecha", "hora_inicio", "hora_fin", "asignatura_id", "estudiantes"]
 }
