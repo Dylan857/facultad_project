@@ -7,7 +7,6 @@ from models.usuarios_class import Usuario
 from models.asignatura_class import Asignatura
 from sqlalchemy.exc import DataError
 from sqlalchemy import and_
-from datetime import datetime
 
 
 db = Database()
@@ -38,27 +37,23 @@ class TutoriaRepoImpl(TutoriaRepo):
             
             asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
 
-            docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
+            docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
 
             new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id)
 
             for estudiante in estudiantes:
-                estudiante = session.query(Usuario).filter(Usuario.id == estudiante and Usuario.activo == 1).first()
+                estudiante = session.query(Usuario).filter(and_(Usuario.id == estudiante, Usuario.activo == 1)).first()
                 new_tutoria.estudiantes.append(estudiante)
                 emails.append(estudiante.email)
             emails.append(docente.email)
             
             session.add(new_tutoria)
 
-            hora_inicio_objeto = datetime.strptime(new_tutoria.hora_inicio, "%H:%M")
-            hora_inicio_12h = hora_inicio_objeto.strftime("%I:%M %p")
-            hora_fin_objeto = datetime.strptime(new_tutoria.hora_fin, "%H:%M")
-            hora_fin_12h = hora_fin_objeto.strftime("%I:%M %p")
-
-            fecha_objeto = datetime.strptime(new_tutoria.fecha, "%Y/%m/%d")
-            fecha_formateada = fecha_objeto.strftime("%d/%m/%Y")
-            
             session.commit()
+
+            hora_inicio_12h = self.hora_12h(new_tutoria.hora_inicio)
+            hora_fin_12h = self.hora_12h(new_tutoria.hora_fin)
+            fecha_formateada = self.fecha_formateada(new_tutoria.fecha)
 
             mail = current_app.extensions['mail']
             msg = Message("Tutoria agendada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
@@ -70,6 +65,15 @@ class TutoriaRepoImpl(TutoriaRepo):
             return True
         except DataError as e:
             raise e
+        
+    def hora_12h(self, hora):
+        hora_12h = hora.strftime("%I:%M %p")
+        return hora_12h
+    
+    def fecha_formateada(self, fecha):
+        fecha_formateada = fecha.strftime("%d/%m/%Y")        
+        return fecha_formateada
+
     
     def get_tutorias(self):
         session = db.get_session()
@@ -79,8 +83,8 @@ class TutoriaRepoImpl(TutoriaRepo):
     
     def find_tutoria_by_docente(self, documento_docente):
         session = db.get_session()
-        docente = session.query(Usuario).filter(Usuario.numero_identificacion == documento_docente and Usuario.activo == 1).first()
-        tutorias = session.query(Tutoria).filter(Tutoria.docente_id == docente.id and Tutoria.activo == 1).all()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.docente_id == docente.id, Tutoria.activo == 1)).all()
 
         tutorias_list = self.tutorias_to_dict(tutorias)
 
@@ -88,14 +92,14 @@ class TutoriaRepoImpl(TutoriaRepo):
     
     def find_tutoria_by_fecha(self, fecha):
         session = db.get_session()
-        tutorias = session.query(Tutoria).filter(Tutoria.fecha == fecha and Tutoria.activo == 1).all()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.fecha == fecha, Tutoria.activo == 1)).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
         return tutorias_list
     
     def find_tutoria_by_asignatura(self, asignatura):
         session = db.get_session()
-        asignatura = session.query(Asignatura).filter(Asignatura.nombre == asignatura and Asignatura.activo == 1).first()
-        tutorias = session.query(Tutoria).filter(Tutoria.asignatura_id == asignatura.id and Tutoria.activo == 1).all()
+        asignatura = session.query(Asignatura).filter(and_(Asignatura.nombre == asignatura, Asignatura.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.asignatura_id == asignatura.id, Tutoria.activo == 1)).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
         return tutorias_list
     
@@ -113,7 +117,7 @@ class TutoriaRepoImpl(TutoriaRepo):
     
     def get_docente(self, docente_id):
         session = db.get_session()
-        docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
+        docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
         docente_list = []
         docente_dict = {
             'nombre' : docente.nombre,
@@ -128,7 +132,7 @@ class TutoriaRepoImpl(TutoriaRepo):
 
         session = db.get_session()
         asignatura_list = []
-        asignatura = session.query(Asignatura).filter(Asignatura.id == asignatura_id and Asignatura.activo == 1).first()
+        asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
         asignatura_list.append(asignatura.to_dict())
         return asignatura_list
     
@@ -178,8 +182,8 @@ class TutoriaRepoImpl(TutoriaRepo):
                 return asignatura_valido
 
             tutoria = session.query(Tutoria).filter(and_(Tutoria.id == id, Tutoria.activo == 1)).first()
-            docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
-            asignatura = session.query(Asignatura).filter(Asignatura.id == asignatura_id and Asignatura.activo == 1).first()
+            docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
+            asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
             emails.append(docente.email)            
 
             if tutoria:
@@ -196,13 +200,9 @@ class TutoriaRepoImpl(TutoriaRepo):
                 
                 session.commit()
 
-                hora_inicio_objeto = datetime.strptime(hora_inicio, "%H:%M")
-                hora_inicio_12h = hora_inicio_objeto.strftime("%I:%M %p")
-                hora_fin_objeto = datetime.strptime(hora_fin, "%H:%M")
-                hora_fin_12h = hora_fin_objeto.strftime("%I:%M %p")
-
-                fecha_objeto = datetime.strptime(fecha, "%Y/%m/%d")
-                fecha_formateada = fecha_objeto.strftime("%d/%m/%Y")
+                hora_inicio_12h = self.hora_12h(tutoria.hora_inicio)
+                hora_fin_12h = self.hora_12h(tutoria.hora_fin)
+                fecha_formateada = self.fecha_formateada(tutoria.fecha)
 
                 mail = current_app.extensions['mail']
                 msg = Message("Tutoria modificada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
@@ -221,7 +221,7 @@ class TutoriaRepoImpl(TutoriaRepo):
 
         session = db.get_session()
 
-        tutoria = session.query(Tutoria).filter(and_(Tutoria.id == id and Tutoria.activo == 1)).first()
+        tutoria = session.query(Tutoria).filter(and_(Tutoria.id == id, Tutoria.activo == 1)).first()
 
         if tutoria:
             emails = []
@@ -229,10 +229,10 @@ class TutoriaRepoImpl(TutoriaRepo):
             session.commit()
 
             asignatura = session.query(Asignatura).filter(and_(Asignatura.id == tutoria.asignatura_id, Asignatura.activo == 1)).first()
-            hora_inicio_12h = tutoria.hora_inicio.strftime("%I:%M %p")
-            hora_fin_12h = tutoria.hora_fin.strftime("%I:%M %p")
-
-            fecha_formateada = tutoria.fecha.strftime("%d/%m/%Y")
+            hora_inicio_12h = self.hora_12h(tutoria.hora_inicio)
+            hora_fin_12h = self.hora_12h(tutoria.hora_fin)
+            fecha_formateada = self.fecha_formateada(tutoria.fecha)
+            
             for estudiante in tutoria.estudiantes:
                 emails.append(estudiante.email)
 
@@ -248,7 +248,7 @@ class TutoriaRepoImpl(TutoriaRepo):
     def validar_docente(self, docente_id):
         session = db.get_session()
 
-        docente = session.query(Usuario).filter(Usuario.id == docente_id and Usuario.activo == 1).first()
+        docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
 
         if docente == None:
             error = "docente no encontrado"
@@ -259,7 +259,7 @@ class TutoriaRepoImpl(TutoriaRepo):
         session = db.get_session()
 
         for estudiante in estudiantes:
-            estudiante_encontrado = session.query(Usuario).filter(Usuario.id == estudiante).first()
+            estudiante_encontrado = session.query(Usuario).filter(and_(Usuario.id == estudiante, Usuario.activo == 1)).first()
 
             if estudiante_encontrado == None:
                 error = "Estudiantes no validos"
