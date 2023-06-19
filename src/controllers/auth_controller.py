@@ -60,23 +60,18 @@ def create_user():
             response['status_code'] = 400
             response['message'] = "Numero de documento ya en uso"
             return jsonify(response)
-
-        new_user_temp['nombre'] = nombre
-        new_user_temp['email'] = email
-        new_user_temp['celular'] = celular
-        new_user_temp['tipo_identificacion'] = tipo_identificacion
-        new_user_temp['numero_identificacion'] = numero_identificacion
-        new_user_temp['password'] = password
-        new_user_temp['carrera'] = carrera
-        new_user_temp['rol'] = rol
-        new_user_temp['asignaturas'] = asignaturas
         
-        codigo_generado = usuario_service.generar_codigo(email)
-        if codigo_generado:
+        new_user = usuario_service.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas)
+
+        if new_user == True:
+            return jsonify(response)
+        elif new_user:
+            response['status_code'] = 400
+            response['message'] = new_user
             return jsonify(response)
         else:
             response['status_code'] = 400
-            response['message'] = "Hubo un error al momento de generar el codigo"
+            response['message'] = "Hubo un error al momento de crear el usuario"
             return jsonify(response)
         
     except ValidationError as e:        
@@ -98,14 +93,10 @@ def verificar_codigo():
     verified_code = usuario_service.verify_codigo(codigo)
 
     if verified_code:
-        new_user = usuario_service.create_user(new_user_temp['nombre'], new_user_temp['email'], new_user_temp['celular'],  new_user_temp['tipo_identificacion'] 
-        , new_user_temp['numero_identificacion'], new_user_temp['carrera'], new_user_temp['password'], new_user_temp['rol'], new_user_temp['asignaturas'])
-
-        if new_user:
-            return jsonify(response)
+        return jsonify(response)
     else:
         response['status_code'] = 400
-        response['message'] = "codigo no valido"
+        response['message'] = "codigo no valido o usuario ya activado"
         return jsonify(response)
 
 @auth.route("/login", methods = ['POST'])
@@ -126,7 +117,7 @@ def login():
         return jsonify(response)
     else:
         response['status_code'] = 401
-        response['message'] = "Credenciales de inicio de sesion incorrectos"
+        response['message'] = "Credenciales de inicio de sesion incorrectos o usuario no activado"
         return jsonify(response), 401
     
 # @auth.route("/ruta_protegida")
