@@ -15,19 +15,21 @@ class Usuario(Base):
     numero_identificacion = Column(String(15), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
     fecha_reg = Column(DateTime, default=func.current_timestamp())
-    activo = Column(Integer, default = 1, nullable=False)
+    activo = Column(Integer, default = 0, nullable=False)
+    codigo_verificacion = Column(Integer, nullable=False)
 
     carreras = relationship('Carrera', secondary='estudiante_carrera')
     asignaturas = relationship('Asignatura', secondary='docente_asignatura')
     roles = relationship('Rol', secondary='rol_usuario', back_populates='usuario')
 
-    def __init__(self, nombre, email, celular, tipo_identificacion, numero_identificacion, password):
+    def __init__(self, nombre, email, celular, tipo_identificacion, numero_identificacion, password, codigo_verificacion):
         self.nombre = nombre
         self.email = email
         self.celular = celular
         self.tipo_identificacion = tipo_identificacion
         self.numero_identificacion = numero_identificacion
         self.password = password
+        self.codigo_verificacion = codigo_verificacion
         
     rol_usuario = Table('rol_usuario', Base.metadata, Column('rol_id', ForeignKey('rol.id')), 
                         Column('usuario_id', ForeignKey('usuario.id')))

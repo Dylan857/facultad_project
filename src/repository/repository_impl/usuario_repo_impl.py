@@ -1,4 +1,4 @@
-from flask import current_app
+from flask import current_app, render_template
 from flask_mail import Message
 from repository.repository_interface.usuario_repo import UsuarioRepo
 from models.usuarios_class import Usuario
@@ -23,13 +23,14 @@ class UsuarioRepoImpl(UsuarioRepo):
 
             session = db.get_session()
             roles = self.validar_roles(rol)
+            codigo_verificacion = self.generar_codigo()
 
             if roles:
                 return roles
 
             if "ROLE_ADMIN" in rol and "ROLE_ESTUDIANTE" in rol:
                 password_hashed = self.hashear_password(password)
-                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed)
+                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
             
                 carrera_encontrada = session.query(Carrera).filter(Carrera.id == carrera and Carrera.activo == 1).first()
 
@@ -45,12 +46,14 @@ class UsuarioRepoImpl(UsuarioRepo):
                 
                 session.add(new_user)
                 session.commit()
+
+                self.enviar_email(new_user.email, new_user.codigo_verificacion, new_user.nombre)
                 session.close()
                 return True
             
             elif "ROLE_ADMIN" in rol and "ROLE_DOCENTE" in rol:
                 password_hashed = self.hashear_password(password)
-                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed)
+                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
                 
                 for role in rol:
                     rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
@@ -66,23 +69,25 @@ class UsuarioRepoImpl(UsuarioRepo):
                 
                 session.add(new_user)
                 session.commit()
+                self.enviar_email(new_user.email, new_user.codigo_verificacion, new_user.nombre)
                 session.close()
                 return True
             
             elif "ROLE_ADMIN" in rol:
                 password_hashed = self.hashear_password(password)
-                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed)
+                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
                 for role in rol:
                     rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
                     new_user.roles.append(rol_encontrado)
                 session.add(new_user)
                 session.commit()
+                self.enviar_email(new_user.email, new_user.codigo_verificacion, new_user.nombre)
                 session.close()
                 return True
             
             elif "ROLE_ESTUDIANTE" in rol:
                 password_hashed = self.hashear_password(password)
-                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed)
+                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
                 carrera_encontrada = session.query(Carrera).filter(Carrera.id == carrera and Carrera.activo == 1).first()
                 if carrera_encontrada:
                     new_user.carreras.append(carrera_encontrada)
@@ -95,13 +100,14 @@ class UsuarioRepoImpl(UsuarioRepo):
                     new_user.roles.append(rol_encontrado)
                 session.add(new_user)
                 session.commit()
+                self.enviar_email(new_user.email, new_user.codigo_verificacion, new_user.nombre)
                 session.close()
                 return True
             
             elif "ROLE_DOCENTE" in rol:
             
                 password_hashed = self.hashear_password(password)
-                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed)
+                new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
             
                 for role in rol:
                     rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
@@ -112,42 +118,41 @@ class UsuarioRepoImpl(UsuarioRepo):
                     return validar_asignatura
             
                 for asignatura in asignaturas:
-                    asignatura_encontrada = session.query(Asignatura).filter(Asignatura.id == asignatura and Asignatura.activo == 1).first()
+                    asignatura_encontrada = session.query(Asignatura).filter(and_(Asignatura.id == asignatura, Asignatura.activo == 1)).first()
                     new_user.asignaturas.append(asignatura_encontrada) 
                 
                 session.add(new_user)
                 session.commit()
-                
-                mail = current_app.extensions['mail']
-                msg = Message("Registro exitoso", sender="tutoriasingenierias@gmail.com", recipients=[email])
-                msg.body = f"Se ha registrado exitosamente, usuario: {nombre}"
-                mail.send(msg)
+                self.enviar_email(new_user.email, new_user.codigo_verificacion, new_user.nombre)
                 session.close()
                 return True
         except IntegrityError as e:
             raise e
         
-    def generar_codigo(self, email):
-        session = db.get_session()
-        codigo_verificacion = random.randint(100000, 999999)
-        new_codigo = Codigo(codigo_verificacion)
-        session.add(new_codigo)
-        session.commit()
-
+    def enviar_email(self, email, codigo_verificacion, nombre):
         mail = current_app.extensions['mail']
-        msg = Message("Codigo de verificacion", sender = "tutoriasingenierias@gmail.com", recipients=[email])
-        msg.body = "Para culminar su registro, por favor digite el siguiente codigo de verificacion en la pagina: " + str(codigo_verificacion)
+        msg = Message("Código de verificación", sender="tutoriasingenierias@gmail.com", recipients=[email])
+        msg.html = render_template("codigo_verificacion.html", nombre = nombre, codigo_verificacion = codigo_verificacion)
         mail.send(msg)
+
+    
+    def generar_codigo(self):
+        codigo_verificacion = random.randint(100000, 999999)
         return codigo_verificacion
     
     def verify_codigo(self, codigo):
         session = db.get_session()
 
-        codigo_access = session.query(Codigo).filter(and_(Codigo.codigo_access == codigo, Codigo.used == 1)).first()
+        usuario_activado = session.query(Usuario).filter(and_(Usuario.codigo_verificacion == codigo, Usuario.activo == 0)).first()
 
-        if codigo_access:
-            codigo_access.used = 0
+        if usuario_activado:
+            usuario_activado.activo = 1
             session.commit()
+
+            mail = current_app.extensions['mail']
+            msg = Message("Registro exitoso", sender="tutoriasingenierias@gmail.com", recipients=[usuario_activado.email])
+            msg.html = render_template("registro_exitoso.html", nombre = usuario_activado.nombre)
+            mail.send(msg)
             session.close()
             return True
         else:

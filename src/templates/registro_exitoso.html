@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Notificación de cita</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            position: relative;
+            border-left: 20px solid rgba(17,29,53,255);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+        
+        .corner-image {
+            width: 35%; /* Ajusta el ancho de la imagen según tus necesidades */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro exitoso</h1>
+        <p>Estimado(a), {{ nombre }}</p>
+        <p>Estamos emocionados de darte la bienvenida a nuestra plataforma de tutorías, donde podrás encontrar el apoyo y la guía necesaria para alcanzar tus metas académicas. 
+        Nuestro objetivo es brindarte una experiencia de aprendizaje enriquecedora y personalizada, para que puedas aprovechar al máximo tus habilidades y potencial.
+        </p>
+        <p>Nuestro equipo de tutores altamente capacitados y dedicados está aquí para ayudarte en cada paso del camino. Ya sea que necesites ayuda con un tema específico, desees mejorar tus habilidades de estudio o busques orientación general en tu trayectoria académica, 
+        estaremos encantados de proporcionarte el apoyo que necesitas.</p>
+        <p>En nuestra plataforma, podrás acceder a una amplia variedad de recursos, incluyendo sesiones de tutoría, material de estudio adicional, ejercicios prácticos y herramientas interactivas. Nos esforzamos por crear un entorno colaborativo y de confianza, 
+        donde podrás plantear tus dudas y recibir asesoramiento individualizado para fortalecer tus conocimientos.</p>
+        <p>No dudes en explorar todas las funcionalidades de nuestro sistema de tutorías y aprovechar al máximo los recursos disponibles. 
+        Estamos aquí para ayudarte a alcanzar el éxito académico y superar tus desafíos de aprendizaje.</p>
+        <p>Una vez más, ¡bienvenido! Estamos encantados de tenerte a bordo y esperamos acompañarte en tu camino hacia el logro de tus metas académicas.</p>
+        <p>Atentamente,</p>
+        <img src="https://www.unibarranquilla.edu.co/images/logo.png" alt="Imagen" class="corner-image">
+    </div>
+</body>
+</html>
