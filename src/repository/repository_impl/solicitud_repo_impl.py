@@ -1,4 +1,4 @@
-from flask import current_app
+from flask import current_app, render_template
 from repository.repository_interface.solicitud_repo import SolicitudRepository
 from models.solicitud_class import Solicitud
 from configs.database import Database
@@ -6,6 +6,7 @@ from models.usuarios_class import Usuario
 from sqlalchemy.orm import aliased
 from sqlalchemy.exc import SQLAlchemyError
 from flask_mail import Message
+from sqlalchemy import and_
 
 db = Database()
 
@@ -56,8 +57,8 @@ class SolicitudRepositoryImpl(SolicitudRepository):
         session = db.get_session()
         try:
 
-            estudiante = session.query(Usuario).filter(Usuario.numero_identificacion == cedula_estudiante and Usuario.activo == 1).first()
-            docente = session.query(Usuario).filter(Usuario.numero_identificacion == cedula_docente and Usuario.activo == 1).first()
+            estudiante = session.query(Usuario).filter(and_(Usuario.numero_identificacion == cedula_estudiante, Usuario.activo == 1)).first()
+            docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == cedula_docente, Usuario.activo == 1)).first()
             if estudiante == None:
                 return estudiante
             elif docente == None:
@@ -68,10 +69,9 @@ class SolicitudRepositoryImpl(SolicitudRepository):
             session.commit()
 
             mail = current_app.extensions['mail']
-            msg = Message("Solicitud de tutoria", sender = "tutoriasingenierias@gmail.com", recipients=[docente.email])
-            msg.body = f"Solicitud enviada por el usuario: {estudiante.email}. Descripcion solicitud: {descripcion_solicitud}"
+            msg = Message("Solicitud de tutoria", sender = "Tutorias Ingenierias", recipients=[docente.email])
+            msg.html = render_template("solicitud.html", docente = docente.nombre, estudiante_email = estudiante.email, estudiante = estudiante.nombre, descripcion_solicitud = descripcion_solicitud)
             mail.send(msg)
-            
             session.close()
             return True
         except SQLAlchemyError as e:
