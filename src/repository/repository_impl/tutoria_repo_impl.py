@@ -79,21 +79,22 @@ class TutoriaRepoImpl(TutoriaRepo):
         session = db.get_session()
         tutorias = session.query(Tutoria).filter(Tutoria.activo == 1).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
         return tutorias_list
     
     def find_tutoria_by_docente(self, documento_docente):
         session = db.get_session()
         docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
         tutorias = session.query(Tutoria).filter(and_(Tutoria.docente_id == docente.id, Tutoria.activo == 1)).all()
-
         tutorias_list = self.tutorias_to_dict(tutorias)
-
+        session.close()
         return tutorias_list
     
     def find_tutoria_by_fecha(self, fecha):
         session = db.get_session()
         tutorias = session.query(Tutoria).filter(and_(Tutoria.fecha == fecha, Tutoria.activo == 1)).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
         return tutorias_list
     
     def find_tutoria_by_asignatura(self, asignatura):
@@ -101,8 +102,38 @@ class TutoriaRepoImpl(TutoriaRepo):
         asignatura = session.query(Asignatura).filter(and_(Asignatura.nombre == asignatura, Asignatura.activo == 1)).first()
         tutorias = session.query(Tutoria).filter(and_(Tutoria.asignatura_id == asignatura.id, Tutoria.activo == 1)).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
         return tutorias_list
     
+    def find_tutoria_by_docente_asignatura(self, documento_docente, asignatura):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        asignatura = session.query(Asignatura).filter(and_(Asignatura.nombre == asignatura, Asignatura.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.docente_id == docente.id, Tutoria.asignatura_id == asignatura.id, Tutoria.activo == 1)).all()
+        tutorias_list = self.tutorias_to_dict(tutorias)
+        return tutorias_list
+    
+    def find_tutoria_by_fecha_asignatura(self, fecha, asignatura):
+        session = db.get_session()
+        asignatura = session.query(Asignatura).filter(and_(Asignatura.nombre == asignatura, Asignatura.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(Tutoria.asignatura_id == asignatura.id, Tutoria.fecha == fecha, Tutoria.activo == 1).all()
+        
+    def find_tutoria_by_docente_fecha(self, documento_docente, fecha):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.docente_id == docente.id, Tutoria.fecha == fecha, Tutoria.activo == 1)).all()
+        tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
+        return tutorias_list
+    
+    def find_tutoria_by_docente_fecha_asignatura(self, documento_docente, fecha, asignatura):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        asignatura = session.query(Asignatura).filter(and_(Asignatura.nombre == asignatura, Asignatura.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.docente_id == docente.id, Tutoria.fecha == fecha, Tutoria.asignatura_id == asignatura.id, Tutoria.activo == 1)).all()
+        tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
+        return tutorias_list
 
     def get_estudiantes(self, estudiantes):
         estudiantes_list = []
@@ -125,7 +156,7 @@ class TutoriaRepoImpl(TutoriaRepo):
             'numero_identificacion' : docente.numero_identificacion
         }
         docente_list.append(docente_dict)
-
+        session.close()
         return docente_list
     
     def get_asignatura(self, asignatura_id):
@@ -134,6 +165,7 @@ class TutoriaRepoImpl(TutoriaRepo):
         asignatura_list = []
         asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
         asignatura_list.append(asignatura.to_dict())
+        session.close()
         return asignatura_list
     
 
@@ -146,12 +178,15 @@ class TutoriaRepoImpl(TutoriaRepo):
             docente_list = self.get_docente(tutoria.docente_id)
 
             asignatura_list = self.get_asignatura(tutoria.asignatura_id)
+            hora_inicio_12h = self.hora_12h(tutoria.hora_inicio)
+            hora_fin_12h = self.hora_12h(tutoria.hora_fin)
+            fecha_format = self.fecha_formateada(tutoria.fecha)
 
             tutorias_dict = {
                 'id' : tutoria.id,
-                'fecha' : str(tutoria.fecha),
-                'hora_inicio' : str(tutoria.hora_inicio),
-                'hora_fin' : str(tutoria.hora_fin),
+                'fecha' : fecha_format,
+                'hora_inicio' : hora_inicio_12h,
+                'hora_fin' : hora_fin_12h,
                 'docente' : docente_list,
                 'estudiantes' : estudiantes_list,
                 'asignatura' : asignatura_list
