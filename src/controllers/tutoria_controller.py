@@ -71,8 +71,13 @@ def get_tutoria_by_docente(numero_documento):
     }
 
     tutorias = tutoria_service.find_tutorias_by_docente(numero_documento)
-    response['datos'] = tutorias
-    return jsonify(response)
+    
+    if tutorias:
+        response['datos'] = tutorias
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se encontraron tutorias"
+        return jsonify(response)
 
 @tutoria.route("/find_tutoria_fecha/<string:fecha>", methods = ['GET'])
 def get_tutoria_by_fecha(fecha):
@@ -84,8 +89,14 @@ def get_tutoria_by_fecha(fecha):
     }
 
     tutorias = tutoria_service.find_tutorias_by_fecha(fecha)
-    response['datos'] = tutorias
-    return jsonify(response)
+
+    if tutorias:
+        response['datos'] = tutorias
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se encontraron tutorias"
+        return jsonify(response)
+
 
 @tutoria.route("/find_tutoria_asignatura/<string:asignatura>")
 def get_tutoria_by_asignatura(asignatura):
@@ -103,6 +114,78 @@ def get_tutoria_by_asignatura(asignatura):
         response['status_code'] = 404
         response['message'] = "No se encontraron tutorias para esa materia"
     return jsonify(response)
+
+@tutoria.route("/find_tutoria/<string:documento_docente>/<string:fecha>", methods = ['GET'])
+def get_tutoria_docente_fecha(documento_docente, fecha):
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    tutorias = tutoria_service.find_tutoria_by_docente_fecha(documento_docente, fecha)
+    if tutorias:
+        response['datos'] = tutorias
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se encontraron tutorias"
+        return jsonify(response)
+
+@tutoria.route("find_tutoria/<string:fecha>/<string:asignatura>")
+def get_tutoria_fecha_asignatura(fecha, asignatura):
+    
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+    tutorias = tutoria_service.find_tutoria_by_fecha_asignatura(fecha, asignatura)
+
+    if tutorias:
+        response['datos'] = tutorias
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se econtraron tutorias"
+        return jsonify(response)
+    
+@tutoria.route("/find_tutoria/<string:documento_docente>/<string:asignatura>", methods = ['GET'])
+def get_tutoria_docente_asignatura(documento_docente, asignatura):
+
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    tutorias = tutoria_service.find_tutoria_by_docente_asignatura(documento_docente, asignatura)
+    if tutorias:
+        response['datos'] = tutorias
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se encontraron tutorias"
+        return jsonify(response)
+
+@tutoria.route("/find_tutoria/<string:documento_docente>/<string:fecha>/<string:asignatura>")
+def get_tutoria_docente_fecha_asignatura(documento_docente, fecha, asignatura):
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    tutorias = tutoria_service.find_tutoria_by_docente_fecha_asignatura(documento_docente, fecha, asignatura)
+    if tutorias:
+        response['datos'] = tutorias
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se encontraron tutorias"
+        return jsonify(response)
+
+    
 
 @tutoria.route("/update_tutoria/<string:id>", methods = ['PUT'])
 def update_tutoria(id):

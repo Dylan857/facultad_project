@@ -29,3 +29,16 @@ class TutoriaService:
         
     def delete_tutoria(self, id):
         return self.tutoria_repository.delete_tutoria(id)
+    
+    
+    def find_tutoria_by_docente_asignatura(self, documento_docente, asignatura):
+        return self.tutoria_repository.find_tutoria_by_docente_asignatura(documento_docente, asignatura)
+    
+    def find_tutoria_by_fecha_asignatura(self, fecha, asignatura):
+        return self.tutoria_repository.find_tutoria_by_fecha_asignatura(fecha, asignatura)
+    
+    def find_tutoria_by_docente_fecha(self, documento_docente, fecha):
+        return self.tutoria_repository.find_tutoria_by_docente_fecha(documento_docente, fecha)
+    
+    def find_tutoria_by_docente_fecha_asignatura(self, documento_docente, fecha, asignatura):
+        return self.tutoria_repository.find_tutoria_by_docente_fecha_asignatura(documento_docente, fecha, asignatura)
