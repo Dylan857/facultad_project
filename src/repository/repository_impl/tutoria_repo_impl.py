@@ -45,7 +45,6 @@ class TutoriaRepoImpl(TutoriaRepo):
                 estudiante = session.query(Usuario).filter(and_(Usuario.id == estudiante, Usuario.activo == 1)).first()
                 new_tutoria.estudiantes.append(estudiante)
                 emails.append(estudiante.email)
-            emails.append(docente.email)
             
             session.add(new_tutoria)
 
@@ -56,10 +55,13 @@ class TutoriaRepoImpl(TutoriaRepo):
             fecha_formateada = self.fecha_formateada(new_tutoria.fecha)
 
             mail = current_app.extensions['mail']
-            msg = Message("Tutoria agendada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
-            msg.html = render_template("agendado_tutoria.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
-            mail.send(msg)
+            msg_estudiante = Message("Tutoria agendada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
+            msg_estudiante.html = render_template("agendado_tutoria.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
+            mail.send(msg_estudiante)
 
+            msg_docente = Message("Tutoria agendada", sender="Tutorias ingenierias", recipients=[docente.email])
+            msg_docente.html = render_template("agendado_tutoria_docente.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, estudiantes=new_tutoria.estudiantes)
+            mail.send(msg_docente)
             session.close()
 
             return True
@@ -117,6 +119,9 @@ class TutoriaRepoImpl(TutoriaRepo):
         session = db.get_session()
         asignatura = session.query(Asignatura).filter(and_(Asignatura.nombre == asignatura, Asignatura.activo == 1)).first()
         tutorias = session.query(Tutoria).filter(Tutoria.asignatura_id == asignatura.id, Tutoria.fecha == fecha, Tutoria.activo == 1).all()
+        tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
+        return tutorias_list
         
     def find_tutoria_by_docente_fecha(self, documento_docente, fecha):
         session = db.get_session()
@@ -219,7 +224,6 @@ class TutoriaRepoImpl(TutoriaRepo):
             tutoria = session.query(Tutoria).filter(and_(Tutoria.id == id, Tutoria.activo == 1)).first()
             docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
             asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
-            emails.append(docente.email)            
 
             if tutoria:
                 tutoria.asignatura_id = docente_id
@@ -240,9 +244,13 @@ class TutoriaRepoImpl(TutoriaRepo):
                 fecha_formateada = self.fecha_formateada(tutoria.fecha)
 
                 mail = current_app.extensions['mail']
-                msg = Message("Tutoria modificada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
+                msg = Message("Tutoria modificada", sender = "Tutorias ingenierias", recipients=emails)
                 msg.html = render_template("tutoria_modificada.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
                 mail.send(msg)
+
+                msg_docente = Message("Tutoria modificada", sender="Tutorias ingenierias", recipients=[docente.email])
+                msg_docente.html = render_template("tutoria_modificada_docente.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, estudiantes=tutoria.estudiantes)
+                mail.send(msg_docente)
 
                 session.close()
 
