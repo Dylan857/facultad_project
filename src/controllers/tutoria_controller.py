@@ -208,16 +208,20 @@ def update_tutoria(id):
 
         tutoria_edit = tutoria_service.update_tutoria(id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
 
-        if tutoria_edit:
+        if tutoria_edit == True:
             return jsonify(response)
+        elif tutoria_edit:
+            response['status_code'] = 400
+            response['message'] = tutoria_edit
+            return jsonify(response), 400
         else:
             response['status_code'] = 404
             response['message'] = 'Tutoria no encontrada'
-            return jsonify(response)
+            return jsonify(response), 404
     except DataError as e:
         response['status_code']= 400
         response['message'] = "Proporcione una fecha o hora valida por favor"
-        return jsonify(response)
+        return jsonify(response), 400
     
 @tutoria.route("/delete_tutoria/<string:id>", methods = ['DELETE'])
 def delete_tutoria(id):
