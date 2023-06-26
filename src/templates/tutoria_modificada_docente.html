@@ -71,6 +71,38 @@
     .custom-table tr:nth-child(even) {
         background-color: #f1f3f5;
     }
+
+    #table {
+        max-width: 600px;
+        overflow-x: scroll;
+    }
+
+    #table::-webkit-scrollbar {
+      width: 10px;
+    }
+  
+    #table::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
+  
+    #table::-webkit-scrollbar-thumb {
+      background-color: rgba(17,29,53,255);
+      border-radius: 5px;
+    }
+  
+    #table::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(17,29,53,255);
+    }
+
+    @media (max-width: 767px) {
+    /* Estilos específicos para dispositivos móviles */
+    #table {
+      overflow-x: scroll; /* Permite desplazamiento horizontal en dispositivos móviles */
+    }
+    table {
+      width: auto; /* Ancho automático para adaptarse al contenido en dispositivos móviles */
+    }
+  }
     </style>
 </head>
 <body>
@@ -82,20 +114,22 @@
         Queremos notificarle que la nueva fecha y hora de la tutoría son las siguientes: fecha: {{fecha}}, hora de inicio: {{hora_inicio}}, hora de fin: {{hora_fin}}, 
         y la asignatura a tratar será: {{asignatura}}</p>
         <p>A continuación, se presenta el listado de estudiantes asociados a la tutoría</p>
-        <table class="table table-bordered custom-table">
-            <tr>
-                <th class="header-cell">Nombre</th>
-                <th class="header-cell">Email</th>
-                <th class="header-cell">Cédula</th>
-            </tr>
-            <tr>
-                {% for estudiante in estudiantes %}
-                <td>{{estudiante.nombre}}</td>
-                <td>{{estudiante.email}}</td>
-                <td>{{estudiante.numero_identificacion}}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        <div id="table">
+            <table class="table table-bordered custom-table">
+                <tr>
+                    <th class="header-cell">Nombre</th>
+                    <th class="header-cell">Email</th>
+                    <th class="header-cell">Cédula</th>
+                </tr>
+                <tr>
+                    {% for estudiante in estudiantes %}
+                    <td>{{estudiante.nombre}}</td>
+                    <td>{{estudiante.email}}</td>
+                    <td>{{estudiante.numero_identificacion}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
         <p>Por favor, asegúrese de llegar puntualmente a la tutoría y de tener a su disposición cualquier material o documentación relevante para aprovechar al máximo la sesión.</p>
         <p>Si tiene alguna pregunta no dude en comunicarse con nosotros. Estaremos encantados de atenderle y brindarle la asistencia necesaria.</p>
         <p>Atentamente,</p>
