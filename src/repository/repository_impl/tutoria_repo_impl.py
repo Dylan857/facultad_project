@@ -231,6 +231,7 @@ class TutoriaRepoImpl(TutoriaRepo):
                 tutoria.hora_inicio = hora_inicio
                 tutoria.hora_fin = hora_fin
                 tutoria.asignatura_id = asignatura_id
+                tutoria.estudiantes.clear()
 
                 for estudiante in estudiantes:
                     estudiante_encontrado = session.query(Usuario).filter(and_(Usuario.numero_identificacion == estudiante, Usuario.activo == 1)).first()
@@ -270,6 +271,8 @@ class TutoriaRepoImpl(TutoriaRepo):
             emails = []
             tutoria.activo = 0
             session.commit()
+            docente = session.query(Usuario).filter(and_(Usuario.id == tutoria.docente_id, Usuario.activo == 1)).first()
+            emails.append(docente.email)
 
             asignatura = session.query(Asignatura).filter(and_(Asignatura.id == tutoria.asignatura_id, Asignatura.activo == 1)).first()
             hora_inicio_12h = self.hora_12h(tutoria.hora_inicio)
