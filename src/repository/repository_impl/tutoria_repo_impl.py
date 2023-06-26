@@ -7,7 +7,7 @@ from models.usuarios_class import Usuario
 from models.asignatura_class import Asignatura
 from sqlalchemy.exc import DataError
 from sqlalchemy import and_
-
+from models.carrera_class import Carrera
 
 db = Database()
 
@@ -20,6 +20,7 @@ class TutoriaRepoImpl(TutoriaRepo):
             session = db.get_session()
 
             emails = []
+            carreras = []
             docente_valido = self.validar_docente(docente_id)
 
             if docente_valido:

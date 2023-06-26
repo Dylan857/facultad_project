@@ -96,12 +96,11 @@
     }
 
     @media (max-width: 767px) {
-    /* Estilos específicos para dispositivos móviles */
     #table {
-      overflow-x: scroll; /* Permite desplazamiento horizontal en dispositivos móviles */
+      overflow-x: scroll;
     }
     table {
-      width: auto; /* Ancho automático para adaptarse al contenido en dispositivos móviles */
+      width: auto;
     }
   }
     </style>
@@ -121,12 +120,16 @@
                     <th class="header-cell">Nombre</th>
                     <th class="header-cell">Email</th>
                     <th class="header-cell">Cédula</th>
+                    <th class="header-cell">Carrera</th>
                 </tr>
                 <tr>
                     {% for estudiante in estudiantes %}
                     <td>{{estudiante.nombre}}</td>
                     <td>{{estudiante.email}}</td>
                     <td>{{estudiante.numero_identificacion}}</td>
+                    {% for carrera in estudiante.carreras %}
+                    <td>{{ carrera.nombre }}</td>
+                    {% endfor %}
                 </tr>
                 {% endfor %}
             </table>
