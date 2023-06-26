@@ -37,12 +37,12 @@ class TutoriaRepoImpl(TutoriaRepo):
             
             asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
 
-            docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
+            docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == docente_id, Usuario.activo == 1)).first()
 
             new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id)
 
             for estudiante in estudiantes:
-                estudiante = session.query(Usuario).filter(and_(Usuario.id == estudiante, Usuario.activo == 1)).first()
+                estudiante = session.query(Usuario).filter(and_(Usuario.numero_identificacion == estudiante, Usuario.activo == 1)).first()
                 new_tutoria.estudiantes.append(estudiante)
                 emails.append(estudiante.email)
             
@@ -222,7 +222,7 @@ class TutoriaRepoImpl(TutoriaRepo):
                 return asignatura_valido
 
             tutoria = session.query(Tutoria).filter(and_(Tutoria.id == id, Tutoria.activo == 1)).first()
-            docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
+            docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == docente_id, Usuario.activo == 1)).first()
             asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
 
             if tutoria:
@@ -233,7 +233,7 @@ class TutoriaRepoImpl(TutoriaRepo):
                 tutoria.asignatura_id = asignatura_id
 
                 for estudiante in estudiantes:
-                    estudiante_encontrado = session.query(Usuario).filter(and_(Usuario.id == estudiante, Usuario.activo == 1)).first()
+                    estudiante_encontrado = session.query(Usuario).filter(and_(Usuario.numero_identificacion == estudiante, Usuario.activo == 1)).first()
                     tutoria.estudiantes.append(estudiante_encontrado)
                     emails.append(estudiante_encontrado.email)
                 
@@ -291,7 +291,7 @@ class TutoriaRepoImpl(TutoriaRepo):
     def validar_docente(self, docente_id):
         session = db.get_session()
 
-        docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == docente_id, Usuario.activo == 1)).first()
 
         if docente == None:
             error = "docente no encontrado"
@@ -302,7 +302,7 @@ class TutoriaRepoImpl(TutoriaRepo):
         session = db.get_session()
 
         for estudiante in estudiantes:
-            estudiante_encontrado = session.query(Usuario).filter(and_(Usuario.id == estudiante, Usuario.activo == 1)).first()
+            estudiante_encontrado = session.query(Usuario).filter(and_(Usuario.numero_identificacion == estudiante, Usuario.activo == 1)).first()
 
             if estudiante_encontrado == None:
                 error = "Estudiantes no validos"
