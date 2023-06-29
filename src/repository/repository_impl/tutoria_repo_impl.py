@@ -6,8 +6,8 @@ from models.tutoria_class import Tutoria
 from models.usuarios_class import Usuario
 from models.asignatura_class import Asignatura
 from sqlalchemy.exc import DataError
-from sqlalchemy import and_
-from models.carrera_class import Carrera
+from sqlalchemy import and_, func
+from datetime import date
 
 db = Database()
 
@@ -20,7 +20,6 @@ class TutoriaRepoImpl(TutoriaRepo):
             session = db.get_session()
 
             emails = []
-            carreras = []
             docente_valido = self.validar_docente(docente_id)
 
             if docente_valido:
@@ -140,7 +139,61 @@ class TutoriaRepoImpl(TutoriaRepo):
         tutorias_list = self.tutorias_to_dict(tutorias)
         session.close()
         return tutorias_list
-
+    
+    def get_tutorias_soon(self, documento_docente):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.docente_id == docente.id, Tutoria.activo == 1, Tutoria.fecha > date.today())).limit(5).all()
+        tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
+        return tutorias_list
+    
+    def count_tutorias_month_by_docente(self, documento_docente):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        tutorias_count = session.query(func.count(Tutoria.id)).filter(and_(Tutoria.docente_id == docente.id, Tutoria.activo == 1, (Tutoria.fecha - date.today() <= 30),(Tutoria.fecha - date.today() >= 0))).scalar()
+        session.close()
+        return tutorias_count
+    
+    def count_tutorias_week_by_docente(self, documento_docente):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        tutorias_count = session.query(func.count(Tutoria.id)).filter(and_(Tutoria.docente_id == docente.id, Tutoria.activo == 1, (Tutoria.fecha - date.today() <= 7),(Tutoria.fecha - date.today() >= 0))).scalar()
+        session.close()
+        return tutorias_count
+    
+    def count_tutorias_day_by_docente(self, documento_docente):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        tutorias_count = session.query(func.count(Tutoria.id)).filter(and_(Tutoria.docente_id == docente.id, Tutoria.activo == 1, (Tutoria.fecha - date.today() == 0),(Tutoria.fecha - date.today() >= 0))).scalar()
+        session.close()
+        return tutorias_count
+    
+    def get_tutorias_soon_admin(self):
+        session = db.get_session()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.activo == 1, Tutoria.fecha > date.today())).limit(5).all()
+        tutorias_list = self.tutorias_to_dict(tutorias)
+        session.close()
+        return tutorias_list
+    
+    def count_tutorias_month_admin(self):
+        session = db.get_session()
+        tutorias_count = session.query(func.count(Tutoria.id)).filter(and_(Tutoria.activo == 1, (Tutoria.fecha - date.today() <= 30),(Tutoria.fecha - date.today() >= 0))).scalar()
+        session.close()
+        return tutorias_count
+    
+    def count_tutorias_week_admin(self):
+        session = db.get_session()
+        tutorias_count = session.query(func.count(Tutoria.id)).filter(and_(Tutoria.activo == 1, (Tutoria.fecha - date.today() <= 7),(Tutoria.fecha - date.today() >= 0))).scalar()
+        session.close()
+        return tutorias_count
+    
+    def count_tutorias_day_admin(self):
+        session = db.get_session()
+        tutorias_count = session.query(func.count(Tutoria.id)).filter(and_(Tutoria.activo == 1, (Tutoria.fecha - date.today() == 0),(Tutoria.fecha - date.today() >= 0))).scalar()
+        session.close()
+        return tutorias_count
+    
     def get_estudiantes(self, estudiantes):
         estudiantes_list = []
         for estudiante in estudiantes:
