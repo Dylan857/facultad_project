@@ -87,6 +87,11 @@ class TutoriaRepoImpl(TutoriaRepo):
     def find_tutoria_by_docente(self, documento_docente):
         session = db.get_session()
         docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+
+        if docente == None:
+            error = None
+            return error
+        
         tutorias = session.query(Tutoria).filter(and_(Tutoria.docente_id == docente.id, Tutoria.activo == 1)).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
         session.close()
@@ -102,6 +107,11 @@ class TutoriaRepoImpl(TutoriaRepo):
     def find_tutoria_by_asignatura(self, asignatura):
         session = db.get_session()
         asignatura = session.query(Asignatura).filter(and_(Asignatura.nombre == asignatura, Asignatura.activo == 1)).first()
+
+        if asignatura == None:
+            error = None
+            return error
+        
         tutorias = session.query(Tutoria).filter(and_(Tutoria.asignatura_id == asignatura.id, Tutoria.activo == 1)).all()
         tutorias_list = self.tutorias_to_dict(tutorias)
         session.close()

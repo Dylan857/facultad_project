@@ -72,8 +72,14 @@ def get_tutoria_by_docente(numero_documento):
 
     tutorias = tutoria_service.find_tutorias_by_docente(numero_documento)
     
-    if tutorias:
+    if tutorias == None:
+        response['status_code'] = 400
+        response['message'] = "Documento de docente no valido"
+        return jsonify(response)
+    
+    elif tutorias:
         response['datos'] = tutorias
+        return jsonify(response)
     else:
         response['status_code'] = 404
         response['message'] = "No se encontraron tutorias"
@@ -87,16 +93,20 @@ def get_tutoria_by_fecha(fecha):
         'message' : 'OK',
         'datos' : []
     }
+    try:        
+        tutorias = tutoria_service.find_tutorias_by_fecha(fecha)
 
-    tutorias = tutoria_service.find_tutorias_by_fecha(fecha)
-
-    if tutorias:
-        response['datos'] = tutorias
-    else:
-        response['status_code'] = 404
-        response['message'] = "No se encontraron tutorias"
-        return jsonify(response)
-
+        if tutorias:
+            response['datos'] = tutorias
+            return jsonify(response)
+        else:
+            response['status_code'] = 404
+            response['message'] = "No se encontraron tutorias"
+            return jsonify(response), 404
+    except DataError:
+        response['status_code'] = 400
+        response['message'] = "Proporcione una fecha valida"
+        return jsonify(response), 400
 
 @tutoria.route("/find_tutoria_asignatura/<string:asignatura>", methods = ['GET'])
 def get_tutoria_by_asignatura(asignatura):
@@ -108,8 +118,15 @@ def get_tutoria_by_asignatura(asignatura):
     }
     tutorias = tutoria_service.find_tutorias_by_asignatura(asignatura)
 
-    if tutorias:
+    if tutorias == None:
+        response['status_code'] = 400
+        response['message'] = "Asignatura no valida"
+        return jsonify(response)
+    
+    elif tutorias:
         response['datos'] = tutorias
+        return jsonify(response)
+    
     else:
         response['status_code'] = 404
         response['message'] = "No se encontraron tutorias para esa materia"
