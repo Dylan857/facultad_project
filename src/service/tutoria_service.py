@@ -42,3 +42,27 @@ class TutoriaService:
     
     def find_tutoria_by_docente_fecha_asignatura(self, documento_docente, fecha, asignatura):
         return self.tutoria_repository.find_tutoria_by_docente_fecha_asignatura(documento_docente, fecha, asignatura)
+    
+    def get_tutorias_soon(self, documento_docente):
+        return self.tutoria_repository.get_tutorias_soon(documento_docente)
+    
+    def count_tutorias_month_by_docente(self, documento_docente):
+        return self.tutoria_repository.count_tutorias_month_by_docente(documento_docente)
+    
+    def count_tutorias_week_by_docente(self, documento_docente):
+        return self.tutoria_repository.count_tutorias_week_by_docente(documento_docente)
+    
+    def count_tutorias_day_by_docente(self, documento_docente):
+        return self.tutoria_repository.count_tutorias_day_by_docente(documento_docente)
+    
+    def get_tutorias_soon_admin(self):
+        return self.tutoria_repository.get_tutorias_soon_admin()
+    
+    def count_tutorias_month_admin(self):
+        return self.tutoria_repository.count_tutorias_month_admin()
+    
+    def count_tutorias_week_admin(self):
+        return self.tutoria_repository.count_tutorias_week_admin()
+    
+    def count_tutorias_day_admin(self):
+        return self.tutoria_repository.count_tutorias_day_admin()
