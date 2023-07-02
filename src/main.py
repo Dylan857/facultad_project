@@ -7,6 +7,7 @@ from Json.jwt_class import JWT
 from controllers.usuario_controller import usuario
 from controllers.tutoria_controller import tutoria
 from controllers.asignatura_controller import asignatura
+from controllers.carrera_controller import carrera
 from configs.mail import MailConfig
 from flask_mail import Mail
 
@@ -29,6 +30,7 @@ app.register_blueprint(auth)
 app.register_blueprint(usuario)
 app.register_blueprint(tutoria)
 app.register_blueprint(asignatura)
+app.register_blueprint(carrera)
 
 if __name__ == '__main__':
     app.run(debug=True)
