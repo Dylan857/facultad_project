@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask
 from configs.database import Database
 from controllers.solicitud_controller import solicitud
 from controllers.auth_controller import auth
