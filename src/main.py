@@ -18,7 +18,7 @@ app.config.from_object(MailConfig)
 mail = Mail(app)
 cors = CORS(app, resources={
     r"/*": {
-        "origins": "http://localhost:5000",  # El origen permitido para las solicitudes
+        "origins": "http://localhost:5173",  # El origen permitido para las solicitudes
         "methods": ["GET", "POST", "PUT", "DELETE"],  # Los métodos HTTP permitidos
         "allow_headers": ["Content-Type", "Authorization"]  # Los encabezados permitidos
     }
