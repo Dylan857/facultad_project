@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from configs.database import Database
 from controllers.solicitud_controller import solicitud
 from controllers.auth_controller import auth
@@ -14,6 +15,7 @@ db = Database()
 JWT._init_jwt(app)
 app.config.from_object(MailConfig)
 mail = Mail(app)
+CORS(app)
 
 app.register_blueprint(solicitud)
 app.register_blueprint(auth)
