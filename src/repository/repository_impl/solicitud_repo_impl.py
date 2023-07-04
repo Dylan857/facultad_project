@@ -7,6 +7,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.exc import SQLAlchemyError
 from flask_mail import Message
 from sqlalchemy import and_
+from email.utils import formataddr
 
 db = Database()
 
@@ -69,7 +70,7 @@ class SolicitudRepositoryImpl(SolicitudRepository):
             session.commit()
 
             mail = current_app.extensions['mail']
-            msg = Message("Solicitud de tutoria", sender = "Tutorias Ingenierias", recipients=[docente.email])
+            msg = Message("Solicitud de tutoria", sender = formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[docente.email])
             msg.html = render_template("solicitud.html", docente = docente.nombre, estudiante_email = estudiante.email, estudiante = estudiante.nombre, descripcion_solicitud = descripcion_solicitud)
             mail.send(msg)
             session.close()
