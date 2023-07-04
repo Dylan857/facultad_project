@@ -224,7 +224,7 @@ class UsuarioRepoImpl(UsuarioRepo):
         usuarios_list = []
         for usuario in usuarios_estudiante:
             roles = self.get_roles_by_usuario(usuario.roles)
-            carreras = self.get_carreras()
+            carreras = self.get_carreras(usuario.carreras)
 
             usuario_dict = {
                 'nombre' : usuario.nombre,
@@ -263,7 +263,7 @@ class UsuarioRepoImpl(UsuarioRepo):
     def get_users_docentes(self):
         session = db.get_session()
         rol_docente = session.query(Rol).filter(Rol.rol == "ROLE_DOCENTE").first()
-        usuarios_docentes = session.query(Usuario).filter(Usuario.roles.contains(and_(rol_docente), Usuario.activo == 1)).all()
+        usuarios_docentes = session.query(Usuario).filter(and_(Usuario.roles.contains(rol_docente), Usuario.activo == 1)).all()
         usuarios_list = []
         for usuario in usuarios_docentes:
             roles = self.get_roles_by_usuario(usuario.roles)
