@@ -8,24 +8,12 @@ from jsonschema.validators import validate
 from jsonschema import ValidationError
 from validate.jsonschema import json_schema
 from flask_mail import Message
-
+from validate.JWT_validate import JWTValidate
 
 
 auth = Blueprint('auth', __name__, url_prefix="/auth")
 usuario_repository = UsuarioRepoImpl()
 usuario_service = UsuarioService(usuario_repository)
-
-new_user_temp = {
-    'nombre' : '',
-    'email' : '',
-    'celular' : '',
-    'tipo_identificacion' : '',
-    'numero_identificacion' : '',
-    'carrera' : '',
-    'password' : '',
-    'rol' : [],
-    'asignaturas' : []
-}
 
 @auth.route("/register", methods = ['POST'])
 def create_user():
@@ -120,11 +108,10 @@ def login():
         response['message'] = "Credenciales de inicio de sesion incorrectos o usuario no activado"
         return jsonify(response), 401
     
-# @auth.route("/ruta_protegida")
-# @jwt_required()
-# def ruta_protegida():
-#     current_user = JWT.get_current_user()
-#     usuario_roles = usuario_service.get_roles(current_user)
-#     for rol in usuario_roles:
-#         if "ROLE_ESTUDIANTE" in rol.get('rol'):
-#             return jsonify({'message' : 'Tiene acceso'})
+@auth.route("/ruta_protegida")
+@jwt_required()
+def ruta_protegida():
+    current_user = JWT.get_current_user()
+    JWTValidate.validar_token_admin(current_user)
+
+    return jsonify({'message' : 'Funciono lo que pense'})        

@@ -1,7 +1,9 @@
 from flask import jsonify, Blueprint
 from repository.repository_impl.carrera_repo_impl import CarreraRepoImpl
 from service.carrera_service import CarreraService
-
+from flask_jwt_extended import jwt_required
+from validate.JWT_validate import JWTValidate
+from Json.jwt_class import JWT
 
 carrera = Blueprint('carrera', __name__, url_prefix='/carrera')
 carrera_repository = CarreraRepoImpl()
@@ -9,12 +11,18 @@ carrera_service = CarreraService(carrera_repository)
 
 
 @carrera.route("/get_carreras", methods = ['GET'])
+@jwt_required()
 def get_carreras():
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_estudiante(current_user)
+    if token:
+        return jsonify(token)
 
     carreras = carrera_service.get_carreras()
 

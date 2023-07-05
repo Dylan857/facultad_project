@@ -165,19 +165,7 @@ class UsuarioRepoImpl(UsuarioRepo):
         
         if usuario and pbkdf2_sha256.verify(password, usuario.password):
             roles = self.get_roles(usuario.email)
-            additional_claims = {'roles' : roles,
-                                 'nombre' : usuario.nombre,
-                                 'celular' : usuario.celular
-                                 }
-            for rol in roles:
-                if "ROLE_ESTUDIANTE" in rol.get('rol'):
-                    carreras = self.get_carreras(usuario.carreras)
-                    additional_claims['carreras'] = carreras
-                elif "ROLE_DOCENTE" in rol.get('rol'):
-                    asignaturas = self.get_asignaturas(usuario.asignaturas)
-                    additional_claims['asignaturas'] = asignaturas
-
-            
+            additional_claims = {'roles' : roles}
             access_token = JWT.generate_access_token(identity=usuario.email, additional_claims=additional_claims)
             return access_token
         else:
@@ -285,7 +273,7 @@ class UsuarioRepoImpl(UsuarioRepo):
 
     def get_roles(self, email):
         session = db.get_session()
-        usuario = session.query(Usuario).filter(and_(Usuario.email == email and Usuario.activo == 1)).first()
+        usuario = session.query(Usuario).filter(and_(Usuario.email == email, Usuario.activo == 1)).first()
         roles_list = []
         for rol in usuario.roles:
             roles_dict = {
@@ -294,6 +282,26 @@ class UsuarioRepoImpl(UsuarioRepo):
             roles_list.append(roles_dict)
         session.close()
         return roles_list
+    
+    def user_information(self, email):
+        session = db.get_session()
+        usuario = session.query(Usuario).filter(and_(Usuario.email == email, Usuario.activo == 1)).first()
+        roles_usuario = self.get_roles_by_usuario(usuario.roles)
+        usuario_dict = {
+            'nombre' : usuario.nombre,
+            'email' : usuario.email,
+            'celular' : usuario.celular,
+            'tipo_identificacion' : usuario.tipo_identificacion,
+            'numero_identificacion' : usuario.numero_identificacion,
+            'roles' : roles_usuario
+        }
+
+        if any("ROLE_ESTUDIANTE" in rol.get('rol') for rol in roles_usuario):
+            usuario_dict['carrera'] = self.get_carreras(usuario.carreras)
+        elif any("ROLE_DOCENTE" in rol.get('rol') for rol in roles_usuario):
+            usuario_dict['asignaturas'] = self.get_asignaturas(usuario.asignaturas)
+        session.close()
+        return usuario_dict
     
     def get_roles_by_usuario(self, roles):
         roles_list = []

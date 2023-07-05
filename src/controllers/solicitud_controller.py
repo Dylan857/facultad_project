@@ -5,7 +5,9 @@ from configs.database import Database
 from jsonschema.validators import validate
 from jsonschema import ValidationError
 from validate.jsonschema import json_schema_solicitud
-
+from flask_jwt_extended import jwt_required
+from validate.JWT_validate import JWTValidate
+from Json.jwt_class import JWT
 
 solicitud = Blueprint('solicitud', __name__, url_prefix='/solicitud')
 solicitud_repository = SolicitudRepositoryImpl()
@@ -13,22 +15,35 @@ solicitud_service = SolicitudService(solicitud_repository)
 
 
 @solicitud.route('/solicitudes', methods = ['GET'])
+@jwt_required()
 def get_solicitudes():
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_admin(current_user)
+    if token:
+        return jsonify(token)
+    
     response['datos'] = solicitud_service.get_solicitudes()
     return jsonify(response)
 
 @solicitud.route("/solicitud_docente/<string:id>", methods = ['GET'])
+@jwt_required()
 def get_solicitud_by_docente(id):
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
 
     solicitudes = solicitud_service.get_solicitud_by_docente(id)
     if solicitudes:
@@ -40,12 +55,18 @@ def get_solicitud_by_docente(id):
         return jsonify(response), 404
 
 @solicitud.route("/hacer_solicitud", methods = ['POST'])
+@jwt_required()
 def hacer_solicitud():
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_estudiante(current_user)
+    if token:
+        return jsonify(token)
 
     try:
 
