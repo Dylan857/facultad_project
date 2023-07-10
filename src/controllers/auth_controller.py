@@ -39,15 +39,15 @@ def create_user():
         if usuario_service.validar_email(email):
             response['status_code'] = 400
             response['message'] = "Email ya en uso"
-            return jsonify(response)
+            return jsonify(response), 400
         elif usuario_service.validar_celular(celular):
             response['status_code'] = 400
             response['message'] = "Celular ya en uso"
-            return jsonify(response)
+            return jsonify(response), 400
         elif usuario_service.validar_documento(numero_identificacion):
             response['status_code'] = 400
             response['message'] = "Numero de documento ya en uso"
-            return jsonify(response)
+            return jsonify(response), 400
         
         new_user = usuario_service.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas)
 
