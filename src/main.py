@@ -10,12 +10,20 @@ from controllers.asignatura_controller import asignatura
 from controllers.carrera_controller import carrera
 from configs.mail import MailConfig
 from flask_mail import Mail
+from dotenv import load_dotenv
+from flask_apscheduler import APScheduler
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 
 db = Database()
 JWT._init_jwt(app)
 app.config.from_object(MailConfig)
+
+app.config['SCHEDULER_API_ENABLED'] = os.getenv("SCHEDULER_API_ENABLED")
+app.config["JOBS"] = eval(os.getenv("JOBS"))
 mail = Mail(app)
 cors = CORS(app, resources={
     r"/*": {
@@ -25,6 +33,8 @@ cors = CORS(app, resources={
     }
 })
 
+scheduler = APScheduler()
+
 app.register_blueprint(solicitud)
 app.register_blueprint(auth)
 app.register_blueprint(usuario)
@@ -32,5 +42,8 @@ app.register_blueprint(tutoria)
 app.register_blueprint(asignatura)
 app.register_blueprint(carrera)
 
+scheduler.init_app(app)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    scheduler.start()
+    app.run(debug=True, use_reloader = False)

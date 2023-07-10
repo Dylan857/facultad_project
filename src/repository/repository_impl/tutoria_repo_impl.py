@@ -204,13 +204,21 @@ class TutoriaRepoImpl(TutoriaRepo):
         session.close()
         return tutorias_count
     
+    def tutorias_day(self):
+        session = db.get_session()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.activo == 1, Tutoria.fecha == date.today())).all()
+        tutorias_dict = self.tutorias_to_dict(tutorias)
+        session.close()
+        return tutorias_dict
+    
     def get_estudiantes(self, estudiantes):
         estudiantes_list = []
         for estudiante in estudiantes:
             estudiante_dict = {
                 'nombre' : estudiante.nombre,
                 'tipo_identificacion' : estudiante.tipo_identificacion,
-                'numero_identificacion' : estudiante.numero_identificacion
+                'numero_identificacion' : estudiante.numero_identificacion,
+                'email' : estudiante.email
                 }
             estudiantes_list.append(estudiante_dict)
         return estudiantes_list
