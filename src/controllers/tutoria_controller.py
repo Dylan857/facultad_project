@@ -1,10 +1,11 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, make_response
 from service.tutoria_service import TutoriaService
 from repository.repository_impl.tutoria_repo_impl import TutoriaRepoImpl
 from sqlalchemy.exc import DataError
 from jsonschema.validators import validate
 from jsonschema import ValidationError
 from validate.jsonschema import json_schema_tutoria
+from flask_weasyprint import HTML, CSS
 
 tutoria = Blueprint('tutoria', __name__, url_prefix = "/tutoria")
 tutoria_repository = TutoriaRepoImpl()
@@ -395,3 +396,25 @@ def delete_tutoria(id):
         response['status_code'] = 404
         response['message'] = "Tutoria no encontrada"
         return jsonify(response)
+    
+
+@tutoria.route("/reports_tutoria")
+def reports_tutoria():
+    datos_reporte = obtener_datos_reporte()
+    rendered = render_template('reporte_tutorias.html', datos = datos_reporte)
+    pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A4; margin: 1cm }')])
+    response = make_response(pdf)
+
+    # Crea una respuesta del tipo application/pdf
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=reporte.pdf'
+
+    return response
+
+def obtener_datos_reporte():
+    return {
+        'titulo': 'Reporte de ejemplo',
+        'descripcion': 'Este es un reporte de ejemplo generado con Flask y WeasyPrint',
+        'datos': [1, 2, 3, 4, 5]
+    }
