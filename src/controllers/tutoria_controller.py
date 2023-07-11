@@ -400,8 +400,8 @@ def delete_tutoria(id):
 
 @tutoria.route("/reports_tutoria")
 def reports_tutoria():
-    datos_reporte = obtener_datos_reporte()
-    rendered = render_template('reporte_tutorias.html', datos = datos_reporte)
+    # datos_reporte = obtener_datos_reporte()
+    rendered = render_template('reporte_tutorias.html', nombre_docente = "Evelio Arrieta", programa = "Ingeniera Telematica")
     pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A4; margin: 1cm }')])
     response = make_response(pdf)
 

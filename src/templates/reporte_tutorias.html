@@ -1,50 +1,37 @@
-<!DOCTYPE html>
-<html>
 <head>
-    <title>Reporte</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        p {
-            margin-bottom: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 </head>
-<body>
-    <img src="/src/templates/logo.png" alt="Imagen" class="corner-image"><h1>Reporte tutorias</h1>
-    <p></p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for dato in datos.datos %}
-                <tr>
-                    <td>{{ dato.id }}</td>
-                    <td>{{ dato.nombre }}</td>
-                    <td>{{ dato.descripcion }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+<div class="container">
+<p style="text-align: left;"><img src="https://www.unibarranquilla.edu.co/images/logo.png" alt="" width="143" height="75" /></p>
+<p style="text-align: center;">CONSULTA ESTUDIANTES</p>
+<hr />
+<p style="text-align: left;">Nombre del docente: {{nombre_docente}}</p> <p>Programa: {{programa}}</p>
+<hr />
+<table class="table table-bordered border-dark">
+<tbody>
+        <tr>
+        <td>No.</td>
+        <td>Tipo de documento</td>
+        <td>Numero de identificacion</td>
+        <td>Tema desarrollado</td>
+        <td>Programa estudiante</td>
+        <td>Modulo</td>
+        <td>Lugar de consulta</td>
+        <td>Fecha</td>
+        <td>Hora</td>
+        </tr>
+        <tr>
+        <td>1</td>
+        <td>Cedula de ciudadania</td>
+        <td>10018</td>
+        <td>Limites</td>
+        <td>Ingeniera de sistemas</td>
+        <td>Calculo</td>
+        <td>Virtual</td>
+        <td>19-12-2023</td>
+        <td>12:00 PM</td>
+        </tr>
+</tbody>
+</table>
+</div>
