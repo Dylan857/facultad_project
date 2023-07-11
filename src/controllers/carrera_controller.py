@@ -11,19 +11,13 @@ carrera_service = CarreraService(carrera_repository)
 
 
 @carrera.route("/get_carreras", methods = ['GET'])
-@jwt_required()
 def get_carreras():
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
-
-    current_user = JWT.get_current_user()
-    token = JWTValidate.validar_token_estudiante(current_user)
-    if token:
-        return jsonify(token)
-
+    
     carreras = carrera_service.get_carreras()
 
     if carreras:
