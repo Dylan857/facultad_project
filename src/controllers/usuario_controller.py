@@ -104,6 +104,7 @@ def get_users_admin():
 
     if usuarios:
         response['datos'] = usuarios
+        return jsonify(response)
     else:
         response['message'] = "No hay resultados a mostrar"
     return jsonify(response)
@@ -127,6 +128,7 @@ def get_users_docente():
 
     if usuarios:
         response['datos'] = usuarios
+        return jsonify(response)
     else:
         response['message'] = "No hay resultados a mostrar"
     return jsonify(response)
