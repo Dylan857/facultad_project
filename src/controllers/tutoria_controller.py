@@ -9,7 +9,6 @@ from flask_jwt_extended import jwt_required
 from validate.JWT_validate import JWTValidate
 from Json.jwt_class import JWT
 from flask_weasyprint import HTML, CSS
-import requests
 
 tutoria = Blueprint('tutoria', __name__, url_prefix = "/tutoria")
 tutoria_repository = TutoriaRepoImpl()
