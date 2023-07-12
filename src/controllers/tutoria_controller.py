@@ -1,16 +1,22 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, make_response
 from service.tutoria_service import TutoriaService
 from repository.repository_impl.tutoria_repo_impl import TutoriaRepoImpl
 from sqlalchemy.exc import DataError
 from jsonschema.validators import validate
 from jsonschema import ValidationError
 from validate.jsonschema import json_schema_tutoria
+from flask_jwt_extended import jwt_required
+from validate.JWT_validate import JWTValidate
+from Json.jwt_class import JWT
+from flask_weasyprint import HTML, CSS
+import requests
 
 tutoria = Blueprint('tutoria', __name__, url_prefix = "/tutoria")
 tutoria_repository = TutoriaRepoImpl()
 tutoria_service = TutoriaService(tutoria_repository)
 
 @tutoria.route("/create_tutoria", methods = ['POST'])
+@jwt_required()
 def create_tutoria():
     
     response = {
@@ -18,6 +24,12 @@ def create_tutoria():
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
+
     try:
 
         data = request.get_json()
@@ -50,6 +62,7 @@ def create_tutoria():
         return jsonify(response), 400
 
 @tutoria.route("/tutorias")
+@jwt_required()
 def get_tutorias():
 
     response = {
@@ -58,10 +71,16 @@ def get_tutorias():
         'datos' : []
     }
 
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_admin(current_user)
+    if token:
+        return jsonify(token)
+
     response['datos'] = tutoria_service.get_tutorias()
     return jsonify(response)
 
 @tutoria.route("/find_tutoria/<string:numero_documento>", methods = ['GET'])
+@jwt_required()
 def get_tutoria_by_docente(numero_documento):
 
     response = {
@@ -69,6 +88,11 @@ def get_tutoria_by_docente(numero_documento):
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token(current_user)
+    if token:
+        return jsonify(token)
 
     tutorias = tutoria_service.find_tutorias_by_docente(numero_documento)
     
@@ -86,6 +110,7 @@ def get_tutoria_by_docente(numero_documento):
         return jsonify(response)
 
 @tutoria.route("/find_tutoria_fecha/<string:fecha>", methods = ['GET'])
+@jwt_required()
 def get_tutoria_by_fecha(fecha):
     
     response = {
@@ -93,6 +118,12 @@ def get_tutoria_by_fecha(fecha):
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token(current_user)
+    if token:
+        return jsonify(token)
+    
     try:        
         tutorias = tutoria_service.find_tutorias_by_fecha(fecha)
 
@@ -109,6 +140,7 @@ def get_tutoria_by_fecha(fecha):
         return jsonify(response), 400
 
 @tutoria.route("/find_tutoria_asignatura/<string:asignatura>", methods = ['GET'])
+@jwt_required()
 def get_tutoria_by_asignatura(asignatura):
 
     response = {
@@ -116,6 +148,12 @@ def get_tutoria_by_asignatura(asignatura):
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token(current_user)
+    if token:
+        return jsonify(token)
+    
     tutorias = tutoria_service.find_tutorias_by_asignatura(asignatura)
 
     if tutorias == None:
@@ -133,12 +171,18 @@ def get_tutoria_by_asignatura(asignatura):
     return jsonify(response)
 
 @tutoria.route("/find_tutoria/<string:documento_docente>/<string:fecha>", methods = ['GET'])
+@jwt_required()
 def get_tutoria_docente_fecha(documento_docente, fecha):
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token(current_user)
+    if token:
+        return jsonify(token)
 
     tutorias = tutoria_service.find_tutoria_by_docente_fecha(documento_docente, fecha)
     if tutorias:
@@ -150,6 +194,7 @@ def get_tutoria_docente_fecha(documento_docente, fecha):
         return jsonify(response)
 
 @tutoria.route("find_tutoria/<string:fecha>/<string:asignatura>", methods = ['GET'])
+@jwt_required()
 def get_tutoria_fecha_asignatura(fecha, asignatura):
     
     response = {
@@ -157,6 +202,12 @@ def get_tutoria_fecha_asignatura(fecha, asignatura):
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token(current_user)
+    if token:
+        return jsonify(token)
+    
     tutorias = tutoria_service.find_tutoria_by_fecha_asignatura(fecha, asignatura)
 
     if tutorias:
@@ -168,6 +219,7 @@ def get_tutoria_fecha_asignatura(fecha, asignatura):
         return jsonify(response)
     
 @tutoria.route("/find_tutoria/<string:documento_docente>/<string:asignatura>", methods = ['GET'])
+@jwt_required()
 def get_tutoria_docente_asignatura(documento_docente, asignatura):
 
     response = {
@@ -175,6 +227,11 @@ def get_tutoria_docente_asignatura(documento_docente, asignatura):
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token(current_user)
+    if token:
+        return jsonify(token)
 
     tutorias = tutoria_service.find_tutoria_by_docente_asignatura(documento_docente, asignatura)
     if tutorias:
@@ -186,12 +243,18 @@ def get_tutoria_docente_asignatura(documento_docente, asignatura):
         return jsonify(response)
 
 @tutoria.route("/find_tutoria/<string:documento_docente>/<string:fecha>/<string:asignatura>", methods = ['GET'])
+@jwt_required()
 def get_tutoria_docente_fecha_asignatura(documento_docente, fecha, asignatura):
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token(current_user)
+    if token:
+        return jsonify(token)
 
     tutorias = tutoria_service.find_tutoria_by_docente_fecha_asignatura(documento_docente, fecha, asignatura)
     if tutorias:
@@ -203,12 +266,18 @@ def get_tutoria_docente_fecha_asignatura(documento_docente, fecha, asignatura):
         return jsonify(response)
 
 @tutoria.route("/get_tutorias_soon/<string:documento_docente>", methods = ['GET'])
+@jwt_required()
 def get_tutorias_soon(documento_docente):
     response = {
         'status_code' : 200,
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
 
     tutorias = tutoria_service.get_tutorias_soon(documento_docente)
 
@@ -222,6 +291,7 @@ def get_tutorias_soon(documento_docente):
     
 
 @tutoria.route("/get_tutorias_soon_admin", methods = ['GET'])
+@jwt_required()
 def get_tutorias_soon_admin():
     response = {
         'status_code' : 200,
@@ -229,6 +299,11 @@ def get_tutorias_soon_admin():
         'datos' : []
     }
 
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_admin(current_user)
+    if token:
+        return jsonify(token)
+    
     tutorias = tutoria_service.get_tutorias_soon_admin()
 
     if tutorias:
@@ -240,6 +315,7 @@ def get_tutorias_soon_admin():
         return jsonify(response)
     
 @tutoria.route("/count_tutorias_month_by_docente/<string:documento_docente>", methods = ['GET'])
+@jwt_required()
 def count_tutorias_month_by_docente(documento_docente):
     
     response = {
@@ -247,6 +323,11 @@ def count_tutorias_month_by_docente(documento_docente):
         'message' : 'OK',
         'count' : 0
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
 
     count_tutorias = tutoria_service.count_tutorias_month_by_docente(documento_docente)
     if count_tutorias:
@@ -257,6 +338,7 @@ def count_tutorias_month_by_docente(documento_docente):
         return jsonify(response)
 
 @tutoria.route("/count_tutorias_month_admin", methods = ['GET'])
+@jwt_required()
 def count_tutorias_month_admin():
     
     response = {
@@ -264,6 +346,11 @@ def count_tutorias_month_admin():
         'message' : 'OK',
         'count' : 0
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_admin(current_user)
+    if token:
+        return jsonify(token)
 
     count_tutorias = tutoria_service.count_tutorias_month_admin()
     if count_tutorias:
@@ -275,6 +362,7 @@ def count_tutorias_month_admin():
 
 
 @tutoria.route("/count_tutorias_week_by_docente/<string:documento_docente>", methods = ['GET'])
+@jwt_required()
 def count_tutorias_week_by_docente(documento_docente):
     
     response = {
@@ -282,6 +370,11 @@ def count_tutorias_week_by_docente(documento_docente):
         'message' : 'OK',
         'count' : 0
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
 
     count_tutorias = tutoria_service.count_tutorias_week_by_docente(documento_docente)
     if count_tutorias:
@@ -292,6 +385,7 @@ def count_tutorias_week_by_docente(documento_docente):
         return jsonify(response)
     
 @tutoria.route("/count_tutorias_week_admin", methods = ['GET'])
+@jwt_required()
 def count_tutorias_week_admin():
     
     response = {
@@ -299,6 +393,11 @@ def count_tutorias_week_admin():
         'message' : 'OK',
         'count' : 0
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_admin(current_user)
+    if token:
+        return jsonify(token)
 
     count_tutorias = tutoria_service.count_tutorias_week_admin()
     if count_tutorias:
@@ -309,6 +408,7 @@ def count_tutorias_week_admin():
         return jsonify(response)
     
 @tutoria.route("/count_tutorias_day_by_docente/<string:documento_docente>", methods = ['GET'])
+@jwt_required()
 def count_tutorias_day_by_docente(documento_docente):
     
     response = {
@@ -316,6 +416,11 @@ def count_tutorias_day_by_docente(documento_docente):
         'message' : 'OK',
         'count' : 0
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
 
     count_tutorias = tutoria_service.count_tutorias_day_by_docente(documento_docente)
     if count_tutorias:
@@ -326,6 +431,7 @@ def count_tutorias_day_by_docente(documento_docente):
         return jsonify(response)
     
 @tutoria.route("/count_tutorias_day_admin", methods = ['GET'])
+@jwt_required()
 def count_tutorias_day_admin():
     
     response = {
@@ -333,6 +439,11 @@ def count_tutorias_day_admin():
         'message' : 'OK',
         'count' : 0
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_admin(current_user)
+    if token:
+        return jsonify(token)
 
     count_tutorias = tutoria_service.count_tutorias_day_admin()
     if count_tutorias:
@@ -343,6 +454,7 @@ def count_tutorias_day_admin():
         return jsonify(response)
 
 @tutoria.route("/update_tutoria/<string:id>", methods = ['PUT'])
+@jwt_required()
 def update_tutoria(id):
 
     response = {
@@ -350,6 +462,12 @@ def update_tutoria(id):
         'message' : 'OK',
         'datos' : []
     }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
+    
     try:
 
         data = request.get_json()
@@ -379,6 +497,7 @@ def update_tutoria(id):
         return jsonify(response), 400
     
 @tutoria.route("/delete_tutoria/<string:id>", methods = ['DELETE'])
+@jwt_required()
 def delete_tutoria(id):
 
     response = {
@@ -387,6 +506,11 @@ def delete_tutoria(id):
         'datos' : []
     }
 
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
+
     delete_tutoria = tutoria_service.delete_tutoria(id)
 
     if delete_tutoria:
@@ -394,4 +518,25 @@ def delete_tutoria(id):
     else:
         response['status_code'] = 404
         response['message'] = "Tutoria no encontrada"
+        return jsonify(response)
+    
+
+@tutoria.route("/reports_tutoria/<string:id_tutoria>", methods = ['GET'])
+def reports_tutoria(id_tutoria):
+    tutoria = tutoria_service.find_tutoria_by_id(id_tutoria)
+
+    if tutoria:
+        rendered = render_template('reporte_tutorias.html', nombre_docente = tutoria['docente'][0]['nombre'], 
+        programa = tutoria['docente'][0]['programa'][0]['nombre'], tutoria = tutoria)
+        pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f"""inline; filename=reporte_tutoria{tutoria['fecha']}.pdf"""
+
+        return response
+    else:
+        response = {
+            'status_code' : 404,
+            'message' : 'Tutoria no encontrada'
+        }
         return jsonify(response)

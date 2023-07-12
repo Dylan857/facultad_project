@@ -8,24 +8,12 @@ from jsonschema.validators import validate
 from jsonschema import ValidationError
 from validate.jsonschema import json_schema
 from flask_mail import Message
-
+from validate.JWT_validate import JWTValidate
 
 
 auth = Blueprint('auth', __name__, url_prefix="/auth")
 usuario_repository = UsuarioRepoImpl()
 usuario_service = UsuarioService(usuario_repository)
-
-new_user_temp = {
-    'nombre' : '',
-    'email' : '',
-    'celular' : '',
-    'tipo_identificacion' : '',
-    'numero_identificacion' : '',
-    'carrera' : '',
-    'password' : '',
-    'rol' : [],
-    'asignaturas' : []
-}
 
 @auth.route("/register", methods = ['POST'])
 def create_user():
@@ -47,21 +35,22 @@ def create_user():
         password = data.get('password')
         rol = data.get('rol')
         asignaturas = data.get('asignaturas')
+        programa = data.get('programa')
 
         if usuario_service.validar_email(email):
             response['status_code'] = 400
             response['message'] = "Email ya en uso"
-            return jsonify(response)
+            return jsonify(response), 400
         elif usuario_service.validar_celular(celular):
             response['status_code'] = 400
             response['message'] = "Celular ya en uso"
-            return jsonify(response)
+            return jsonify(response), 400
         elif usuario_service.validar_documento(numero_identificacion):
             response['status_code'] = 400
             response['message'] = "Numero de documento ya en uso"
-            return jsonify(response)
+            return jsonify(response), 400
         
-        new_user = usuario_service.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas)
+        new_user = usuario_service.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas, programa)
 
         if new_user == True:
             return jsonify(response)
@@ -120,11 +109,10 @@ def login():
         response['message'] = "Credenciales de inicio de sesion incorrectos o usuario no activado"
         return jsonify(response), 401
     
-# @auth.route("/ruta_protegida")
-# @jwt_required()
-# def ruta_protegida():
-#     current_user = JWT.get_current_user()
-#     usuario_roles = usuario_service.get_roles(current_user)
-#     for rol in usuario_roles:
-#         if "ROLE_ESTUDIANTE" in rol.get('rol'):
-#             return jsonify({'message' : 'Tiene acceso'})
+@auth.route("/ruta_protegida")
+@jwt_required()
+def ruta_protegida():
+    current_user = JWT.get_current_user()
+    JWTValidate.validar_token_admin(current_user)
+
+    return jsonify({'message' : 'Funciono lo que pense'})        

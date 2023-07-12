@@ -5,9 +5,9 @@ class UsuarioService:
         self.usuario_repository = usuario_repository
 
 
-    def create_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas):
+    def create_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas, programa):
         try:
-            return self.usuario_repository.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas)
+            return self.usuario_repository.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas, programa)
         except IntegrityError as e:
             raise e
         
@@ -43,3 +43,6 @@ class UsuarioService:
     
     def verify_codigo(self, codigo):
         return self.usuario_repository.verify_codigo(codigo)
+    
+    def user_information(self, email):
+        return self.usuario_repository.user_information(email)

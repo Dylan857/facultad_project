@@ -43,6 +43,9 @@ class TutoriaService:
     def find_tutoria_by_docente_fecha_asignatura(self, documento_docente, fecha, asignatura):
         return self.tutoria_repository.find_tutoria_by_docente_fecha_asignatura(documento_docente, fecha, asignatura)
     
+    def find_tutoria_by_id(self, id_tutoria):
+        return self.tutoria_repository.find_tutoria_by_id(id_tutoria)
+    
     def get_tutorias_soon(self, documento_docente):
         return self.tutoria_repository.get_tutorias_soon(documento_docente)
     

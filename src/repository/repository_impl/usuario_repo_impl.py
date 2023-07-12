@@ -16,7 +16,7 @@ db = Database()
 
 class UsuarioRepoImpl(UsuarioRepo):
 
-    def create_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas):
+    def create_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas, programa):
 
         try:
 
@@ -53,6 +53,14 @@ class UsuarioRepoImpl(UsuarioRepo):
             elif "ROLE_ADMIN" in rol and "ROLE_DOCENTE" in rol:
                 password_hashed = self.hashear_password(password)
                 new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
+                
+                programa_encontrado = session.query(Carrera).filter(and_(Carrera.id == programa, Carrera.activo == 1)).first()
+                
+                if programa_encontrado:
+                    new_user.programas.append(programa_encontrado)
+                else:
+                    error = "Programa no encontrado"
+                    return error
                 
                 for role in rol:
                     rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
@@ -107,7 +115,15 @@ class UsuarioRepoImpl(UsuarioRepo):
             
                 password_hashed = self.hashear_password(password)
                 new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
-            
+
+                programa_encontrado = session.query(Carrera).filter(and_(Carrera.id == programa, Carrera.activo == 1)).first()
+                
+                if programa_encontrado:
+                    new_user.programas.append(programa_encontrado)
+                else:
+                    error = "Programa no encontrado"
+                    return error
+
                 for role in rol:
                     rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
                     new_user.roles.append(rol_encontrado)
@@ -164,19 +180,7 @@ class UsuarioRepoImpl(UsuarioRepo):
         
         if usuario and pbkdf2_sha256.verify(password, usuario.password):
             roles = self.get_roles(usuario.email)
-            additional_claims = {'roles' : roles,
-                                 'nombre' : usuario.nombre,
-                                 'celular' : usuario.celular
-                                 }
-            for rol in roles:
-                if "ROLE_ESTUDIANTE" in rol.get('rol'):
-                    carreras = self.get_carreras(usuario.carreras)
-                    additional_claims['carreras'] = carreras
-                elif "ROLE_DOCENTE" in rol.get('rol'):
-                    asignaturas = self.get_asignaturas(usuario.asignaturas)
-                    additional_claims['asignaturas'] = asignaturas
-
-            
+            additional_claims = {'roles' : roles}
             access_token = JWT.generate_access_token(identity=usuario.email, additional_claims=additional_claims)
             return access_token
         else:
@@ -209,7 +213,9 @@ class UsuarioRepoImpl(UsuarioRepo):
                     usuario_dict['carrera'] = carreras
 
                 if "ROLE_DOCENTE" in role.get('rol'):
+                    programa = self.get_programa(usuario.programas)
                     asignaturas = self.get_asignaturas(usuario.asignaturas)
+                    usuario_dict['programa'] = programa
                     usuario_dict['asignaturas'] = asignaturas
             usuarios_list.append(usuario_dict)
 
@@ -267,12 +273,14 @@ class UsuarioRepoImpl(UsuarioRepo):
         for usuario in usuarios_docentes:
             roles = self.get_roles_by_usuario(usuario.roles)
             asignaturas = self.get_asignaturas(usuario.asignaturas)
+            programa = self.get_programa(usuario.programas)
             usuario_dict = {
                 'nombre' : usuario.nombre,
                 'email' : usuario.email,
                 'celular' : usuario.celular,
                 'tipo_identificacion' : usuario.tipo_identificacion,
                 'numero_identificacion' : usuario.numero_identificacion,
+                'programa' : programa,
                 'asignaturas' : asignaturas,
                 'roles' : roles
             }
@@ -284,7 +292,7 @@ class UsuarioRepoImpl(UsuarioRepo):
 
     def get_roles(self, email):
         session = db.get_session()
-        usuario = session.query(Usuario).filter(and_(Usuario.email == email and Usuario.activo == 1)).first()
+        usuario = session.query(Usuario).filter(and_(Usuario.email == email, Usuario.activo == 1)).first()
         roles_list = []
         for rol in usuario.roles:
             roles_dict = {
@@ -293,6 +301,26 @@ class UsuarioRepoImpl(UsuarioRepo):
             roles_list.append(roles_dict)
         session.close()
         return roles_list
+    
+    def user_information(self, email):
+        session = db.get_session()
+        usuario = session.query(Usuario).filter(and_(Usuario.email == email, Usuario.activo == 1)).first()
+        roles_usuario = self.get_roles_by_usuario(usuario.roles)
+        usuario_dict = {
+            'nombre' : usuario.nombre,
+            'email' : usuario.email,
+            'celular' : usuario.celular,
+            'tipo_identificacion' : usuario.tipo_identificacion,
+            'numero_identificacion' : usuario.numero_identificacion,
+            'roles' : roles_usuario
+        }
+
+        if any("ROLE_ESTUDIANTE" in rol.get('rol') for rol in roles_usuario):
+            usuario_dict['carrera'] = self.get_carreras(usuario.carreras)
+        elif any("ROLE_DOCENTE" in rol.get('rol') for rol in roles_usuario):
+            usuario_dict['asignaturas'] = self.get_asignaturas(usuario.asignaturas)
+        session.close()
+        return usuario_dict
     
     def get_roles_by_usuario(self, roles):
         roles_list = []
@@ -311,6 +339,12 @@ class UsuarioRepoImpl(UsuarioRepo):
         for asignatura in asignaturas:
             asignaturas_list.append(asignatura.to_dict())
         return asignaturas_list
+    
+    def get_programa(self, programas):
+        programa_list = []
+        for programa in programas:
+            programa_list.append(programa.to_dict())
+        return programa_list
     
     def validar_roles(self, roles):
 
