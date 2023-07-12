@@ -225,9 +225,9 @@ class TutoriaRepoImpl(TutoriaRepo):
                 'nombre' : estudiante.nombre,
                 'tipo_identificacion' : estudiante.tipo_identificacion,
                 'numero_identificacion' : estudiante.numero_identificacion,
-                'email' : estudiante.email
+                'email' : estudiante.email,
                 'carreras' : self.get_programa(estudiante.carreras)
-                }
+            }
             estudiantes_list.append(estudiante_dict)
         return estudiantes_list
     
