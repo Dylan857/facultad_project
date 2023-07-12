@@ -46,3 +46,6 @@ class UsuarioService:
     
     def user_information(self, email):
         return self.usuario_repository.user_information(email)
+    
+    def find_user(self, numero_documento):
+        return self.usuario_repository.find_user(numero_documento)

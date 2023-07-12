@@ -34,6 +34,29 @@ def user_information():
         response['status_code'] = 400
         response['message'] = "Hubo un problema con la informacion del usuario"
         return jsonify(response)
+    
+@usuario.route("/find_usuario/<string:numero_documento>")
+@jwt_required()
+def find_usuario(numero_documento):
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
+    
+    usuario_found = usuario_service.find_user(numero_documento)
+    if usuario_found:
+        response['datos'] = usuario_found
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "Usuario no encontrado"
+        return jsonify(response)
 
 @usuario.route("/users", methods = ['GET'])
 @jwt_required()

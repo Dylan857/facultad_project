@@ -190,6 +190,34 @@ class UsuarioRepoImpl(UsuarioRepo):
     def hashear_password(self, password):
         return pbkdf2_sha256.hash(password)
     
+    def find_user(self, numero_documento):
+        session = db.get_session()
+        usuario = session.query(Usuario).filter(and_(Usuario.numero_identificacion == numero_documento, Usuario.activo == 1)).first()
+        roles = self.get_roles_by_usuario(usuario.roles)
+        usuario_dict = {
+            'nombre' : usuario.nombre,
+            'email' : usuario.email,
+            'celular' : usuario.celular,
+            'tipo_identificacion' : usuario.tipo_identificacion,
+            'numero_identificacion' : usuario.numero_identificacion,
+            'roles' : roles
+        }
+
+        for role in roles:
+                
+            if "ROLE_ESTUDIANTE" in role.get('rol'):
+                carreras = self.get_carreras(usuario.carreras)
+                usuario_dict['carrera'] = carreras
+
+            if "ROLE_DOCENTE" in role.get('rol'):
+                programa = self.get_programa(usuario.programas)
+                asignaturas = self.get_asignaturas(usuario.asignaturas)
+                usuario_dict['programa'] = programa
+                usuario_dict['asignaturas'] = asignaturas
+
+        session.close()
+        return usuario_dict
+    
     def get_users(self):
         session = db.get_session()
         usuarios = session.query(Usuario).filter(Usuario.activo == 1).all()
