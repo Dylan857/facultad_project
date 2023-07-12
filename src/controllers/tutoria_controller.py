@@ -6,6 +6,8 @@ from jsonschema.validators import validate
 from jsonschema import ValidationError
 from validate.jsonschema import json_schema_tutoria
 from flask_weasyprint import HTML, CSS
+import requests
+
 
 tutoria = Blueprint('tutoria', __name__, url_prefix = "/tutoria")
 tutoria_repository = TutoriaRepoImpl()
@@ -398,23 +400,22 @@ def delete_tutoria(id):
         return jsonify(response)
     
 
-@tutoria.route("/reports_tutoria")
-def reports_tutoria():
-    # datos_reporte = obtener_datos_reporte()
-    rendered = render_template('reporte_tutorias.html', nombre_docente = "Evelio Arrieta", programa = "Ingeniera Telematica")
-    pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A4; margin: 1cm }')])
-    response = make_response(pdf)
+@tutoria.route("/reports_tutoria/<string:id_tutoria>", methods = ['GET'])
+def reports_tutoria(id_tutoria):
+    tutoria = tutoria_service.find_tutoria_by_id(id_tutoria)
 
-    # Crea una respuesta del tipo application/pdf
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'inline; filename=reporte.pdf'
+    if tutoria:
+        rendered = render_template('reporte_tutorias.html', nombre_docente = tutoria['docente'][0]['nombre'], 
+        programa = tutoria['docente'][0]['programa'][0]['nombre'], tutoria = tutoria)
+        pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f"""inline; filename=reporte_tutoria{tutoria['fecha']}.pdf"""
 
-    return response
-
-def obtener_datos_reporte():
-    return {
-        'titulo': 'Reporte de ejemplo',
-        'descripcion': 'Este es un reporte de ejemplo generado con Flask y WeasyPrint',
-        'datos': [1, 2, 3, 4, 5]
-    }
+        return response
+    else:
+        response = {
+            'status_code' : 404,
+            'message' : 'Tutoria no encontrada'
+        }
+        return jsonify(response)

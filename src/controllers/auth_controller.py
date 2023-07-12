@@ -47,6 +47,7 @@ def create_user():
         password = data.get('password')
         rol = data.get('rol')
         asignaturas = data.get('asignaturas')
+        programa = data.get('programa')
 
         if usuario_service.validar_email(email):
             response['status_code'] = 400
@@ -61,7 +62,7 @@ def create_user():
             response['message'] = "Numero de documento ya en uso"
             return jsonify(response)
         
-        new_user = usuario_service.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas)
+        new_user = usuario_service.create_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas, programa)
 
         if new_user == True:
             return jsonify(response)

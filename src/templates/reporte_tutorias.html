@@ -1,9 +1,20 @@
-<head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-</head>
+<style>
+    table 
+        { border-collapse: collapse; } 
+    
+    table, th, td 
+        { border: 1px solid black; 
+          text-align: center;
+          padding: 10px;  
+        }
 
+</style>
+
+<head>
+    <title>Tutoria {{tutoria.fecha}}</title>
+</head>
 <div class="container">
-<p style="text-align: left;"><img src="https://www.unibarranquilla.edu.co/images/logo.png" alt="" width="143" height="75" /></p>
+<p style="text-align: left;"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Imagen Unibarranquilla" width="0" height="0" /></p>
 <p style="text-align: center;">CONSULTA ESTUDIANTES</p>
 <hr />
 <p style="text-align: left;">Nombre del docente: {{nombre_docente}}</p> <p>Programa: {{programa}}</p>
@@ -11,27 +22,35 @@
 <table class="table table-bordered border-dark">
 <tbody>
         <tr>
-        <td>No.</td>
-        <td>Tipo de documento</td>
-        <td>Numero de identificacion</td>
-        <td>Tema desarrollado</td>
-        <td>Programa estudiante</td>
-        <td>Modulo</td>
-        <td>Lugar de consulta</td>
-        <td>Fecha</td>
-        <td>Hora</td>
+        <td><b>No.</b></td>
+        <td><b>Nombre estudiante</b></td>
+        <td><b>Tipo de documento</b></td>
+        <td><b>Numero de identificacion</b></td>
+        <td><b>Tema desarrollado</b></td>
+        <td><b>Programa estudiante</b></td>
+        <td><b>Modulo</b></td>
+        <td><b>Lugar de consulta</b></td>
+        <td><b>Fecha</b></td>
+        <td><b>Hora</b></td>
         </tr>
         <tr>
-        <td>1</td>
-        <td>Cedula de ciudadania</td>
-        <td>10018</td>
+            {% for estudiante in tutoria.estudiantes %}
+        <td>{{ loop.index }}</td>
+        <td>{{estudiante.nombre}}</td>
+        <td>{{estudiante.tipo_identificacion}}</td>
+        <td>{{estudiante.numero_identificacion}}</td>
         <td>Limites</td>
-        <td>Ingeniera de sistemas</td>
-        <td>Calculo</td>
+        {% for carrera in estudiante.carreras %}
+        <td>{{carrera.nombre}}</td>
+        {% endfor %}
+        {% for asignatura in tutoria.asignatura %}
+        <td>{{asignatura.nombre}}</td>
+        {% endfor %}
         <td>Virtual</td>
-        <td>19-12-2023</td>
-        <td>12:00 PM</td>
+        <td>{{tutoria.fecha}}</td>
+        <td>{{tutoria.hora_inicio}} - {{tutoria.hora_fin}}</td>
         </tr>
+        {% endfor %}
 </tbody>
 </table>
 </div>
