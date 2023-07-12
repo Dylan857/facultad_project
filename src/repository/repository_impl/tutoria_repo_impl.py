@@ -150,6 +150,13 @@ class TutoriaRepoImpl(TutoriaRepo):
         session.close()
         return tutorias_list
     
+    def find_tutoria_by_id(self, id_tutoria):
+        session = db.get_session()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.id == id_tutoria, Tutoria.activo == 1)).first()
+        tutorias_list = self.tutoria_to_dict(tutorias)
+        session.close()
+        return tutorias_list
+    
     def get_tutorias_soon(self, documento_docente):
         session = db.get_session()
         docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
@@ -210,7 +217,8 @@ class TutoriaRepoImpl(TutoriaRepo):
             estudiante_dict = {
                 'nombre' : estudiante.nombre,
                 'tipo_identificacion' : estudiante.tipo_identificacion,
-                'numero_identificacion' : estudiante.numero_identificacion
+                'numero_identificacion' : estudiante.numero_identificacion,
+                'carreras' : self.get_programa(estudiante.carreras)
                 }
             estudiantes_list.append(estudiante_dict)
         return estudiantes_list
@@ -222,11 +230,16 @@ class TutoriaRepoImpl(TutoriaRepo):
         docente_dict = {
             'nombre' : docente.nombre,
             'tipo_identificacion' : docente.tipo_identificacion,
-            'numero_identificacion' : docente.numero_identificacion
+            'numero_identificacion' : docente.numero_identificacion,
+            'programa' : self.get_programa(docente.programas)
         }
         docente_list.append(docente_dict)
         session.close()
         return docente_list
+    
+    def get_programa(self, programas):
+        programa_list = [programa.to_dict() for programa in programas]
+        return programa_list
     
     def get_asignatura(self, asignatura_id):
 
@@ -263,6 +276,27 @@ class TutoriaRepoImpl(TutoriaRepo):
             tutorias_list.append(tutorias_dict)
         
         return tutorias_list
+    
+    def tutoria_to_dict(self, tutoria):
+        estudiantes_list = self.get_estudiantes(tutoria.estudiantes)
+
+        docente_list = self.get_docente(tutoria.docente_id)
+
+        asignatura_list = self.get_asignatura(tutoria.asignatura_id)
+        hora_inicio_12h = self.hora_12h(tutoria.hora_inicio)
+        hora_fin_12h = self.hora_12h(tutoria.hora_fin)
+        fecha_format = self.fecha_formateada(tutoria.fecha)
+
+        tutoria_dict = {
+            'id' : tutoria.id,
+            'fecha' : fecha_format,
+            'hora_inicio' : hora_inicio_12h,
+            'hora_fin' : hora_fin_12h,
+            'docente' : docente_list,
+            'estudiantes' : estudiantes_list,
+            'asignatura' : asignatura_list
+        }
+        return tutoria_dict
     
     def update_tutoria(self, id, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
 
