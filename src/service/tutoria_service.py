@@ -69,3 +69,6 @@ class TutoriaService:
     
     def count_tutorias_day_admin(self):
         return self.tutoria_repository.count_tutorias_day_admin()
+    
+    def tutorias_day(self):
+        return self.tutoria_repository.tutorias_day()

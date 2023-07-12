@@ -10,7 +10,6 @@ from passlib.hash import pbkdf2_sha256
 from Json.jwt_class import JWT
 from sqlalchemy.exc import IntegrityError
 import random
-from models.codigo_class import Codigo
 from sqlalchemy import and_
 
 db = Database()
