@@ -16,5 +16,6 @@ class Carrera(Base):
 
     def to_dict(self):
         return {
+            'id' : self.id,
             'nombre' : self.nombre
         }
