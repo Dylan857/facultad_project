@@ -17,7 +17,7 @@ db = Database()
 
 class UsuarioRepoImpl(UsuarioRepo):
 
-    def create_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas):
+    def create_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, password, rol, asignaturas, programa):
 
         try:
 
@@ -54,6 +54,14 @@ class UsuarioRepoImpl(UsuarioRepo):
             elif "ROLE_ADMIN" in rol and "ROLE_DOCENTE" in rol:
                 password_hashed = self.hashear_password(password)
                 new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
+                
+                programa_encontrado = session.query(Carrera).filter(and_(Carrera.id == programa, Carrera.activo == 1)).first()
+                
+                if programa_encontrado:
+                    new_user.programas.append(programa_encontrado)
+                else:
+                    error = "Programa no encontrado"
+                    return error
                 
                 for role in rol:
                     rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
@@ -108,7 +116,15 @@ class UsuarioRepoImpl(UsuarioRepo):
             
                 password_hashed = self.hashear_password(password)
                 new_user = Usuario(nombre, email, celular, tipo_identificacion, numero_identificacion, password_hashed, codigo_verificacion)
-            
+
+                programa_encontrado = session.query(Carrera).filter(and_(Carrera.id == programa, Carrera.activo == 1)).first()
+                
+                if programa_encontrado:
+                    new_user.programas.append(programa_encontrado)
+                else:
+                    error = "Programa no encontrado"
+                    return error
+
                 for role in rol:
                     rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
                     new_user.roles.append(rol_encontrado)
@@ -210,7 +226,9 @@ class UsuarioRepoImpl(UsuarioRepo):
                     usuario_dict['carrera'] = carreras
 
                 if "ROLE_DOCENTE" in role.get('rol'):
+                    programa = self.get_programa(usuario.programas)
                     asignaturas = self.get_asignaturas(usuario.asignaturas)
+                    usuario_dict['programa'] = programa
                     usuario_dict['asignaturas'] = asignaturas
             usuarios_list.append(usuario_dict)
 
@@ -268,12 +286,14 @@ class UsuarioRepoImpl(UsuarioRepo):
         for usuario in usuarios_docentes:
             roles = self.get_roles_by_usuario(usuario.roles)
             asignaturas = self.get_asignaturas(usuario.asignaturas)
+            programa = self.get_programa(usuario.programas)
             usuario_dict = {
                 'nombre' : usuario.nombre,
                 'email' : usuario.email,
                 'celular' : usuario.celular,
                 'tipo_identificacion' : usuario.tipo_identificacion,
                 'numero_identificacion' : usuario.numero_identificacion,
+                'programa' : programa,
                 'asignaturas' : asignaturas,
                 'roles' : roles
             }
@@ -312,6 +332,12 @@ class UsuarioRepoImpl(UsuarioRepo):
         for asignatura in asignaturas:
             asignaturas_list.append(asignatura.to_dict())
         return asignaturas_list
+    
+    def get_programa(self, programas):
+        programa_list = []
+        for programa in programas:
+            programa_list.append(programa.to_dict())
+        return programa_list
     
     def validar_roles(self, roles):
 

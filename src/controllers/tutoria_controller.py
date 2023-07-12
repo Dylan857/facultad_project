@@ -1,10 +1,13 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, make_response
 from service.tutoria_service import TutoriaService
 from repository.repository_impl.tutoria_repo_impl import TutoriaRepoImpl
 from sqlalchemy.exc import DataError
 from jsonschema.validators import validate
 from jsonschema import ValidationError
 from validate.jsonschema import json_schema_tutoria
+from flask_weasyprint import HTML, CSS
+import requests
+
 
 tutoria = Blueprint('tutoria', __name__, url_prefix = "/tutoria")
 tutoria_repository = TutoriaRepoImpl()
@@ -394,4 +397,25 @@ def delete_tutoria(id):
     else:
         response['status_code'] = 404
         response['message'] = "Tutoria no encontrada"
+        return jsonify(response)
+    
+
+@tutoria.route("/reports_tutoria/<string:id_tutoria>", methods = ['GET'])
+def reports_tutoria(id_tutoria):
+    tutoria = tutoria_service.find_tutoria_by_id(id_tutoria)
+
+    if tutoria:
+        rendered = render_template('reporte_tutorias.html', nombre_docente = tutoria['docente'][0]['nombre'], 
+        programa = tutoria['docente'][0]['programa'][0]['nombre'], tutoria = tutoria)
+        pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f"""inline; filename=reporte_tutoria{tutoria['fecha']}.pdf"""
+
+        return response
+    else:
+        response = {
+            'status_code' : 404,
+            'message' : 'Tutoria no encontrada'
+        }
         return jsonify(response)

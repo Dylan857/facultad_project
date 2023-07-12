@@ -21,6 +21,7 @@ class Usuario(Base):
     carreras = relationship('Carrera', secondary='estudiante_carrera')
     asignaturas = relationship('Asignatura', secondary='docente_asignatura')
     roles = relationship('Rol', secondary='rol_usuario', back_populates='usuario')
+    programas = relationship('Carrera', secondary='docente_programa')
 
     def __init__(self, nombre, email, celular, tipo_identificacion, numero_identificacion, password, codigo_verificacion):
         self.nombre = nombre
@@ -37,3 +38,5 @@ class Usuario(Base):
     asignatura_docente = Table('docente_asignatura', Base.metadata, Column('docente_id', ForeignKey('usuario.id')), Column('asignatura_id', ForeignKey('asignatura.id')))
 
     carrera_estudiante = Table('estudiante_carrera', Base.metadata, Column('estudiante_id', ForeignKey('usuario.id')), Column('carrera_id', ForeignKey('carrera.id')))
+
+    docente_programa = Table('docente_programa', Base.metadata, Column('docente_id', ForeignKey('usuario.id')), Column('programa_id', ForeignKey('carrera.id')))
