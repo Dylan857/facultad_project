@@ -96,7 +96,7 @@ def get_users_estudiante():
     }
 
     current_user = JWT.get_current_user()
-    token = JWTValidate.validar_token_admin(current_user)
+    token = JWTValidate.validar_token_docente(current_user)
     if token:
         return jsonify(token)
 
