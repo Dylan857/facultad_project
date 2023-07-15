@@ -264,11 +264,10 @@ class TutoriaRepoImpl(TutoriaRepo):
     def get_asignatura(self, asignatura_id):
 
         session = db.get_session()
-        asignatura_list = []
         asignatura = session.query(Asignatura).filter(and_(Asignatura.id == asignatura_id, Asignatura.activo == 1)).first()
-        asignatura_list.append(asignatura.to_dict())
+        asignatura_dict = (asignatura.to_dict())
         session.close()
-        return asignatura_list
+        return asignatura_dict
     
 
     def tutorias_to_dict(self, tutorias):
