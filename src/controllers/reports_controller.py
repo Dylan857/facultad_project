@@ -28,8 +28,8 @@ def reports_tutoria(id_tutoria):
     tutoria = tutoria_service.find_tutoria_by_id(id_tutoria)
 
     if tutoria:
-        rendered = render_template('reporte_tutorias.html', nombre_docente = tutoria['docente'][0]['nombre'], 
-        programa = tutoria['docente'][0]['programa'][0]['nombre'], tutoria = tutoria)
+        rendered = render_template('reporte_tutorias.html', nombre_docente = tutoria['docente']['nombre'], 
+        programa = tutoria['docente']['programa'][0]['nombre'], tutoria = tutoria)
         pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
         response = make_response(pdf)
         response.headers['Content-Type'] = 'application/pdf'

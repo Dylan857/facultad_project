@@ -43,9 +43,7 @@
         {% for carrera in estudiante.carreras %}
         <td>{{carrera.nombre}}</td>
         {% endfor %}
-        {% for asignatura in tutoria.asignatura %}
-        <td>{{asignatura.nombre}}</td>
-        {% endfor %}
+        <td>{{tutoria.asignatura.nombre}}</td>
         <td>Virtual</td>
         <td>{{tutoria.fecha}}</td>
         <td>{{tutoria.hora_inicio}} - {{tutoria.hora_fin}}</td>
