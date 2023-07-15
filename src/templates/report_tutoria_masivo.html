@@ -11,7 +11,7 @@
 </style>
 
 <head>
-    <title>Tutoria {{tutoria.fecha}}</title>
+    <title>Tutoria reporte</title>
 </head>
 <div class="container">
 <p style="text-align: left;"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Imagen Unibarranquilla" width="0" height="0" /></p>
@@ -23,29 +23,35 @@
 <tbody>
         <tr>
         <td><b>No.</b></td>
-        <td><b>Nombre estudiante</b></td>
-        <td><b>Tipo de documento</b></td>
-        <td><b>Numero de identificacion</b></td>
+        <td><b>Numero de identificacion estudiantes</b></td>
         <td><b>Tema desarrollado</b></td>
-        <td><b>Programa estudiante</b></td>
         <td><b>Modulo</b></td>
         <td><b>Lugar de consulta</b></td>
         <td><b>Fecha</b></td>
         <td><b>Hora</b></td>
         </tr>
         <tr>
-            {% for estudiante in tutoria.estudiantes %}
+        {% for tutoria in tutorias %}
         <td>{{ loop.index }}</td>
-        <td>{{estudiante.nombre}}</td>
-        <td>{{estudiante.tipo_identificacion|upper}}</td>
-        <td>{{estudiante.numero_identificacion}}</td>
+        
+        {% if tutoria.estudiantes|length < 2 %}
+        <td>
+            {{tutoria.estudiantes[0].numero_identificacion}}
+        </td>
+        {% else %}
+        <td>
+            {% for estudiante in tutoria.estudiantes %}
+            {{estudiante.numero_identificacion}}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </td>
+        {% endif %}
+
         <td>{{tutoria.tema_desarrollar}}</td>
-        {% for carrera in estudiante.carreras %}
-        <td>{{carrera.nombre}}</td>
-        {% endfor %}
+        
         {% for asignatura in tutoria.asignatura %}
         <td>{{asignatura.nombre}}</td>
         {% endfor %}
+
         <td>Virtual</td>
         <td>{{tutoria.fecha}}</td>
         <td>{{tutoria.hora_inicio}} - {{tutoria.hora_fin}}</td>

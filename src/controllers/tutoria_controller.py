@@ -41,8 +41,9 @@ def create_tutoria():
         hora_fin = data.get('hora_fin')
         asignatura_id = data.get('asignatura_id')
         estudiantes = data.get('estudiantes')
+        tema_desarrollar = data.get("tema_desarrollar")
 
-        new_tutoria = tutoria_service.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+        new_tutoria = tutoria_service.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id, tema_desarrollar)
 
         if new_tutoria == True:
             return jsonify(response)
@@ -106,6 +107,31 @@ def get_tutoria_by_docente(numero_documento):
     else:
         response['status_code'] = 404
         response['message'] = "No se encontraron tutorias"
+        return jsonify(response)
+    
+@tutoria.route("/find_tutoria_id/<string:id>", methods = ['GET'])
+@jwt_required()
+def get_tutoria_by_id(id):
+
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+    if token:
+        return jsonify(token)
+    
+    tutoria = tutoria_service.find_tutoria_by_id(id)
+
+    if tutoria:
+        response['datos'] = tutoria
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "No se encontro tutoria"
         return jsonify(response)
 
 @tutoria.route("/find_tutoria_fecha/<string:fecha>", methods = ['GET'])
@@ -517,25 +543,4 @@ def delete_tutoria(id):
     else:
         response['status_code'] = 404
         response['message'] = "Tutoria no encontrada"
-        return jsonify(response)
-    
-
-@tutoria.route("/reports_tutoria/<string:id_tutoria>", methods = ['GET'])
-def reports_tutoria(id_tutoria):
-    tutoria = tutoria_service.find_tutoria_by_id(id_tutoria)
-
-    if tutoria:
-        rendered = render_template('reporte_tutorias.html', nombre_docente = tutoria['docente'][0]['nombre'], 
-        programa = tutoria['docente'][0]['programa'][0]['nombre'], tutoria = tutoria)
-        pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
-        response = make_response(pdf)
-        response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f"""inline; filename=reporte_tutoria{tutoria['fecha']}.pdf"""
-
-        return response
-    else:
-        response = {
-            'status_code' : 404,
-            'message' : 'Tutoria no encontrada'
-        }
         return jsonify(response)
