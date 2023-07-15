@@ -16,14 +16,7 @@ tutoria_service = TutoriaService(tutoria_repository)
 
 
 @reports.route("/reports_tutoria/<string:id_tutoria>", methods = ['GET'])
-@jwt_required()
 def reports_tutoria(id_tutoria):
-
-    current_user = JWT.get_current_user()
-    token = JWTValidate.validar_token_docente(current_user)
-
-    if token:
-        return jsonify(token)
     
     tutoria = tutoria_service.find_tutoria_by_id(id_tutoria)
 
