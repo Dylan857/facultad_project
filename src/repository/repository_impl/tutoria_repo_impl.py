@@ -13,7 +13,7 @@ db = Database()
 
 class TutoriaRepoImpl(TutoriaRepo):
 
-    def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
+    def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id, tema_desarrollar):
 
         try:
             
@@ -39,7 +39,7 @@ class TutoriaRepoImpl(TutoriaRepo):
 
             docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == docente_id, Usuario.activo == 1)).first()
 
-            new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id)
+            new_tutoria = Tutoria(docente.id, fecha, hora_inicio, hora_fin, asignatura_id, tema_desarrollar)
 
             for estudiante in estudiantes:
                 estudiante = session.query(Usuario).filter(and_(Usuario.numero_identificacion == estudiante, Usuario.activo == 1)).first()
@@ -153,9 +153,23 @@ class TutoriaRepoImpl(TutoriaRepo):
     def find_tutoria_by_id(self, id_tutoria):
         session = db.get_session()
         tutorias = session.query(Tutoria).filter(and_(Tutoria.id == id_tutoria, Tutoria.activo == 1)).first()
-        tutorias_list = self.tutoria_to_dict(tutorias)
-        session.close()
-        return tutorias_list
+
+        if tutorias:
+            tutorias_list = self.tutoria_to_dict(tutorias)
+            session.close()
+            return tutorias_list
+        else:
+            return False
+        
+    def find_tutoria_between_dates(self, fecha_inicio, fecha_final):
+        session = db.get_session()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.fecha.between(fecha_inicio, fecha_final), Tutoria.activo == 1)).order_by(Tutoria.fecha.asc()).all()
+        if tutorias:
+            tutorias_list = self.tutorias_to_dict(tutorias)
+            session.close()
+            return tutorias_list
+        else:
+            return False
     
     def get_tutorias_soon(self, documento_docente):
         session = db.get_session()
@@ -279,7 +293,8 @@ class TutoriaRepoImpl(TutoriaRepo):
                 'hora_fin' : hora_fin_12h,
                 'docente' : docente_list,
                 'estudiantes' : estudiantes_list,
-                'asignatura' : asignatura_list
+                'asignatura' : asignatura_list,
+                'tema_desarrollar' : tutoria.tema_desarrollar
             }
             tutorias_list.append(tutorias_dict)
         
@@ -302,7 +317,8 @@ class TutoriaRepoImpl(TutoriaRepo):
             'hora_fin' : hora_fin_12h,
             'docente' : docente_list,
             'estudiantes' : estudiantes_list,
-            'asignatura' : asignatura_list
+            'asignatura' : asignatura_list,
+            'tema_desarrollar' : tutoria.tema_desarrollar
         }
         return tutoria_dict
     

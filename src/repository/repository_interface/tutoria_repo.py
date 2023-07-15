@@ -1,5 +1,5 @@
 class TutoriaRepo:
-    def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
+    def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id, tema_desarrollar):
         raise NotImplementedError
     def get_tutorias(self):
         raise NotImplementedError

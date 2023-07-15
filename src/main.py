@@ -8,6 +8,7 @@ from controllers.usuario_controller import usuario
 from controllers.tutoria_controller import tutoria
 from controllers.asignatura_controller import asignatura
 from controllers.carrera_controller import carrera
+from controllers.reports_controller import reports
 from configs.mail import MailConfig
 from flask_mail import Mail
 from dotenv import load_dotenv
@@ -41,6 +42,7 @@ app.register_blueprint(usuario)
 app.register_blueprint(tutoria)
 app.register_blueprint(asignatura)
 app.register_blueprint(carrera)
+app.register_blueprint(reports)
 
 scheduler.init_app(app)
 

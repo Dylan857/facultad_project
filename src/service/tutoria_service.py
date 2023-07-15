@@ -3,9 +3,9 @@ class TutoriaService:
     def __init__(self, tutoria_repository):
         self.tutoria_repository = tutoria_repository
 
-    def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id):
+    def create_tutoria(self, docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id, tema_desarrollar):
         try:
-            return self.tutoria_repository.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id)
+            return self.tutoria_repository.create_tutoria(docente_id, fecha, hora_inicio, hora_fin, estudiantes, asignatura_id, tema_desarrollar)
         except DataError as e:
             raise e
     
@@ -30,7 +30,9 @@ class TutoriaService:
     def delete_tutoria(self, id):
         return self.tutoria_repository.delete_tutoria(id)
     
-    
+    def find_tutoria_between_dates(self, fecha_inicio, fecha_final):
+        return self.tutoria_repository.find_tutoria_between_dates(fecha_inicio, fecha_final)
+
     def find_tutoria_by_docente_asignatura(self, documento_docente, asignatura):
         return self.tutoria_repository.find_tutoria_by_docente_asignatura(documento_docente, asignatura)
     
