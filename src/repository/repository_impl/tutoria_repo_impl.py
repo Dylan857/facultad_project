@@ -248,16 +248,14 @@ class TutoriaRepoImpl(TutoriaRepo):
     def get_docente(self, docente_id):
         session = db.get_session()
         docente = session.query(Usuario).filter(and_(Usuario.id == docente_id, Usuario.activo == 1)).first()
-        docente_list = []
         docente_dict = {
             'nombre' : docente.nombre,
             'tipo_identificacion' : docente.tipo_identificacion,
             'numero_identificacion' : docente.numero_identificacion,
             'programa' : self.get_programa(docente.programas)
         }
-        docente_list.append(docente_dict)
         session.close()
-        return docente_list
+        return docente_dict
     
     def get_programa(self, programas):
         programa_list = [programa.to_dict() for programa in programas]
