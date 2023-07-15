@@ -43,7 +43,15 @@ def reports_tutoria(id_tutoria):
         return jsonify(response_not_found), 404
 
 @reports.route("/reports_tutoria/<string:fecha_inicio>/<string:fecha_final>")
+@jwt_required()
 def find_tutoria_between_dates(fecha_inicio, fecha_final):
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_docente(current_user)
+
+    if token:
+        return jsonify(token)
+    
     tutorias = tutoria_service.find_tutoria_between_dates(fecha_inicio, fecha_final)
 
     if tutorias:
