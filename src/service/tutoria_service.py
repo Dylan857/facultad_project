@@ -74,3 +74,6 @@ class TutoriaService:
     
     def tutorias_day(self):
         return self.tutoria_repository.tutorias_day()
+    
+    def tutorias_day_docente(self, documento_docente):
+        return self.tutoria_repository.tutorias_day_docente(documento_docente)

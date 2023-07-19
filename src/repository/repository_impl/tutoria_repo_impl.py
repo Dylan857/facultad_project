@@ -6,8 +6,10 @@ from models.tutoria_class import Tutoria
 from models.usuarios_class import Usuario
 from models.asignatura_class import Asignatura
 from sqlalchemy.exc import DataError
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, distinct
 from datetime import date
+from email.utils import formataddr
+from sqlalchemy.orm import aliased
 
 db = Database()
 
@@ -55,12 +57,12 @@ class TutoriaRepoImpl(TutoriaRepo):
             fecha_formateada = self.fecha_formateada(new_tutoria.fecha)
 
             mail = current_app.extensions['mail']
-            msg_estudiante = Message("Tutoria agendada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
-            msg_estudiante.html = render_template("agendado_tutoria.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
+            msg_estudiante = Message("Tutoria agendada", sender = formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=emails)
+            msg_estudiante.html = render_template("agendado_tutoria.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, tema_desarrollar = new_tutoria.tema_desarrollar)
             mail.send(msg_estudiante)
 
-            msg_docente = Message("Tutoria agendada", sender="Tutorias ingenierias", recipients=[docente.email])
-            msg_docente.html = render_template("agendado_tutoria_docente.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, estudiantes=new_tutoria.estudiantes)
+            msg_docente = Message("Tutoria agendada", sender = formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[docente.email])
+            msg_docente.html = render_template("agendado_tutoria_docente.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, estudiantes=new_tutoria.estudiantes, tema_desarrollar = new_tutoria.tema_desarrollar)
             mail.send(msg_docente)
             session.close()
 
@@ -231,6 +233,13 @@ class TutoriaRepoImpl(TutoriaRepo):
         tutorias_dict = self.tutorias_to_dict(tutorias)
         session.close()
         return tutorias_dict
+
+    def tutorias_day_docente(self, documento_docente):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(Usuario.activo == 1, Usuario.numero_identificacion == documento_docente).first()
+        tutorias = session.query(Tutoria).filter(Tutoria.docente_id == docente.id, Tutoria.activo == 1, Tutoria.fecha == date.today()).all()
+        tutorias_list = self.tutorias_to_dict(tutorias)
+        return tutorias_list
     
     def get_estudiantes(self, estudiantes):
         estudiantes_list = []
@@ -364,12 +373,12 @@ class TutoriaRepoImpl(TutoriaRepo):
                 fecha_formateada = self.fecha_formateada(tutoria.fecha)
 
                 mail = current_app.extensions['mail']
-                msg = Message("Tutoria modificada", sender = "Tutorias ingenierias", recipients=emails)
-                msg.html = render_template("tutoria_modificada.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
+                msg = Message("Tutoria modificada", sender = formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=emails)
+                msg.html = render_template("tutoria_modificada.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, tema_desarrollar = tutoria.tema_desarrollar)
                 mail.send(msg)
 
-                msg_docente = Message("Tutoria modificada", sender="Tutorias ingenierias", recipients=[docente.email])
-                msg_docente.html = render_template("tutoria_modificada_docente.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, estudiantes=tutoria.estudiantes)
+                msg_docente = Message("Tutoria modificada", sender = formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[docente.email])
+                msg_docente.html = render_template("tutoria_modificada_docente.html", docente = docente.nombre, hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, estudiantes=tutoria.estudiantes, tema_desarrollar = tutoria.tema_desarrollar)
                 mail.send(msg_docente)
 
                 session.close()
@@ -402,8 +411,8 @@ class TutoriaRepoImpl(TutoriaRepo):
                 emails.append(estudiante.email)
 
             mail = current_app.extensions['mail']
-            msg = Message("Tutoria cancelada", sender = "tutoriasingenierias@gmail.com", recipients=emails)
-            msg.html = render_template("tutoria_eliminada.html", hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre)
+            msg = Message("Tutoria cancelada",sender = formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=emails)
+            msg.html = render_template("tutoria_eliminada.html", hora_inicio = hora_inicio_12h, hora_fin = hora_fin_12h, fecha = fecha_formateada, asignatura = asignatura.nombre, tema_desarrollar = tutoria.tema_desarrollar)
             mail.send(msg)
             session.close()
             return True

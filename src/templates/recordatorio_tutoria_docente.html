@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Notificación de cita</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            position: relative;
+            border-left: 20px solid rgba(17, 29, 53, 255);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .corner-image {
+            width: 35%;
+            /* Ajusta el ancho de la imagen según tus necesidades */
+            height: auto;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 8px;
+        }
+
+        .custom-table th {
+            background-color: rgba(17, 29, 53, 255);
+            color: #fff
+        }
+
+        .custom-table td {
+            text-align: left;
+            white-space: nowrap;
+            padding: 15px;
+        }
+
+        .custom-table tr:nth-child(even) {
+            background-color: #f1f3f5;
+        }
+
+        #table {
+            max-width: 600px;
+            overflow-x: scroll;
+        }
+
+        #table::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        #table::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+
+        #table::-webkit-scrollbar-thumb {
+            background-color: rgba(17, 29, 53, 255);
+            border-radius: 5px;
+        }
+
+        #table::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(17, 29, 53, 255);
+        }
+
+        @media (max-width: 767px) {
+            #table {
+                overflow-x: scroll;
+            }
+
+            table {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Recordatorio tutorias hoy</h1>
+        <p>Estimado(a) docente {{tutorias[0].docente.nombre}},</p>
+        <p>Espero que este mensaje le encuentre bien. A continuación se le recordara la lista de tutorias programadas
+            para hoy</p>
+        <div id="table">
+            <table class="table table-bordered custom-table">
+                <tr>
+                    <th class="header-cell">No.</th>
+                    <th class="header-cell">Numero de identificacion estudiantes</th>
+                    <th class="header-cell">Tema desarrollado</th>
+                    <th class="header-cell">Modulo</th>
+                    <th class="header-cell">Lugar de consulta</th>
+                    <th class="header-cell">Fecha</th>
+                    <th class="header-cell">Hora</th>
+                </tr>
+                <tr>
+                    {% for tutoria in tutorias %}
+                    <td>{{ loop.index }}</td>
+
+                    {% if tutoria.estudiantes|length < 2 %} <td>
+                        {{tutoria.estudiantes[0].numero_identificacion}}
+                        </td>
+                        {% else %}
+                        <td>
+                            {% for estudiante in tutoria.estudiantes %}
+                            {{estudiante.numero_identificacion}}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        {% endif %}
+
+                        <td>{{tutoria.tema_desarrollar}}</td>
+                        <td>{{tutoria.asignatura.nombre}}</td>
+                        <td>Virtual</td>
+                        <td>{{tutoria.fecha}}</td>
+                        <td>{{tutoria.hora_inicio}} - {{tutoria.hora_fin}}</td>
+                        </tr>
+                    {% endfor %}
+            </table>
+        </div>
+        <p>Por favor, asegúrese de llegar puntualmente a la tutoría y de tener a su disposición cualquier material o
+            documentación relevante para aprovechar al máximo la sesión.</p>
+        <p>Si tiene alguna pregunta o necesita realizar cambios en la tutoría, no dude en comunicarse con nosotros.
+            Estaremos encantados de atenderle y brindarle la asistencia necesaria.</p>
+        <p>Atentamente,</p>
+        <img src="https://www.unibarranquilla.edu.co/images/logo.png" alt="Imagen" class="corner-image">
+    </div>
+</body>
+
+</html>
