@@ -2,6 +2,7 @@ from service.tutoria_service import TutoriaService
 from repository.repository_impl.tutoria_repo_impl import TutoriaRepoImpl
 from flask import current_app, render_template
 from flask_mail import Message
+from email.utils import formataddr
 from service.usuario_service import UsuarioService
 from repository.repository_impl.usuario_repo_impl import UsuarioRepoImpl
 import traceback
@@ -21,7 +22,7 @@ def envio_notificacion_tutoria(app):
             for tutoria in tutorias:
                 emails_estudiantes = get_emails_estudiante(tutoria['estudiantes'])
                 mail = current_app.extensions['mail']
-                msg = Message("Recordatoria de tutoria", sender="tutoriasingenierias@gmail.com", recipients=emails_estudiantes)
+                msg = Message("Recordatoria de tutoria", sender=formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=emails_estudiantes)
                 msg.html = render_template("recordatorio_tutoria.html", fecha = tutoria['fecha'], hora_inicio = tutoria['hora_inicio'], 
                 hora_fin = tutoria['hora_fin'], asignatura = tutoria['asignatura']['nombre'], docente = tutoria['docente']['nombre'])
                 mail.send(msg)
@@ -43,7 +44,7 @@ def envio_notificacion_tutoria_docentes(app):
 def enviar_email(docente, tutorias):
     print(docente['email'])
     mail = current_app.extensions['mail']
-    msg = Message("Lista tutorias hoy", sender="tutoriasingenierias@gmail.com", recipients=[docente['email']])
+    msg = Message("Lista tutorias hoy", sender=formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[docente['email']])
     msg.html = render_template("recordatorio_tutoria_docente.html", tutorias = tutorias) 
     mail.send(msg)
     
