@@ -172,6 +172,17 @@ class TutoriaRepoImpl(TutoriaRepo):
             return tutorias_list
         else:
             return False
+        
+    def find_tutoria_between_dates_docente(self, fecha_inicio, fecha_final, documento_docente):
+        session = db.get_session()
+        docente = session.query(Usuario).filter(and_(Usuario.numero_identificacion == documento_docente, Usuario.activo == 1)).first()
+        tutorias = session.query(Tutoria).filter(and_(Tutoria.fecha.between(fecha_inicio, fecha_final), Tutoria.docente_id == docente.id, Tutoria.activo == 1)).order_by(Tutoria.fecha.asc()).all()
+        if tutorias:
+            tutorias_list = self.tutorias_to_dict(tutorias)
+            session.close()
+            return tutorias_list
+        else:
+            return False
     
     def get_tutorias_soon(self, documento_docente):
         session = db.get_session()

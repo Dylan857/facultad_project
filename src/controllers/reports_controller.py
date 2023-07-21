@@ -17,7 +17,6 @@ tutoria_service = TutoriaService(tutoria_repository)
 
 @reports.route("/reports_tutoria/<string:id_tutoria>", methods = ['GET'])
 def reports_tutoria(id_tutoria):
-    
     tutoria = tutoria_service.find_tutoria_by_id(id_tutoria)
 
     if tutoria:
@@ -36,21 +35,31 @@ def reports_tutoria(id_tutoria):
         return jsonify(response_not_found), 404
 
 @reports.route("/reports_tutoria/<string:fecha_inicio>/<string:fecha_final>")
-@jwt_required()
 def find_tutoria_between_dates(fecha_inicio, fecha_final):
-
-    current_user = JWT.get_current_user()
-    token = JWTValidate.validar_token_docente(current_user)
-
-    if token:
-        return jsonify(token)
-    
     tutorias = tutoria_service.find_tutoria_between_dates(fecha_inicio, fecha_final)
 
     if tutorias:
-        rendered = render_template('report_tutoria_masivo.html', nombre_docente = "Lourdes de Avila", 
-        programa = "Ingeniera telematica", tutorias = tutorias)
-        pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A3;')])
+        rendered = render_template('report_tutoria_masivo.html',tutorias = tutorias)
+        pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'inline; filename=reporte_tutoria.pdf'
+        return response
+    else:
+        response_not_found = {
+            'status_code' : 404,
+            'message' : 'Tutoria no encontrada'
+        }
+        return jsonify(response_not_found), 404
+    
+
+@reports.route("/reports_tutoria/<string:fecha_inicio>/<string:fecha_final>/<string:documento_docente>")
+def find_tutoria_between_dates_docente(fecha_inicio, fecha_final, documento_docente):
+    tutorias = tutoria_service.find_tutoria_between_dates_docente(fecha_inicio, fecha_final, documento_docente)
+
+    if tutorias:
+        rendered = render_template('report_tutoria_masivo.html',tutorias = tutorias)
+        pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
         response = make_response(pdf)
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'inline; filename=reporte_tutoria.pdf'
