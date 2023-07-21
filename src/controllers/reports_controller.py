@@ -34,7 +34,7 @@ def reports_tutoria(id_tutoria):
         }
         return jsonify(response_not_found), 404
 
-@reports.route("/reports_tutoria/<string:fecha_inicio>/<string:fecha_final>")
+@reports.route("/reports_tutoria/<string:fecha_inicio>/<string:fecha_final>", methods = ['GET'])
 def find_tutoria_between_dates(fecha_inicio, fecha_final):
     tutorias = tutoria_service.find_tutoria_between_dates(fecha_inicio, fecha_final)
 
@@ -53,7 +53,7 @@ def find_tutoria_between_dates(fecha_inicio, fecha_final):
         return jsonify(response_not_found), 404
     
 
-@reports.route("/reports_tutoria/<string:fecha_inicio>/<string:fecha_final>/<string:documento_docente>")
+@reports.route("/reports_tutoria/<string:fecha_inicio>/<string:fecha_final>/<string:documento_docente>", methods = ['GET'])
 def find_tutoria_between_dates_docente(fecha_inicio, fecha_final, documento_docente):
     tutorias = tutoria_service.find_tutoria_between_dates_docente(fecha_inicio, fecha_final, documento_docente)
 
