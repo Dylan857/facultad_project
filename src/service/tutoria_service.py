@@ -32,6 +32,9 @@ class TutoriaService:
     
     def find_tutoria_between_dates(self, fecha_inicio, fecha_final):
         return self.tutoria_repository.find_tutoria_between_dates(fecha_inicio, fecha_final)
+    
+    def find_tutoria_between_dates_docente(self, fecha_inicio, fecha_final, documento_docente):
+        return self.tutoria_repository.find_tutoria_between_dates_docente(fecha_inicio, fecha_final, documento_docente)
 
     def find_tutoria_by_docente_asignatura(self, documento_docente, asignatura):
         return self.tutoria_repository.find_tutoria_by_docente_asignatura(documento_docente, asignatura)

@@ -123,14 +123,12 @@
                     <th class="header-cell">Cédula</th>
                     <th class="header-cell">Carrera</th>
                 </tr>
+                {% for estudiante in estudiantes %}
                 <tr>
-                    {% for estudiante in estudiantes %}
                     <td>{{estudiante.nombre}}</td>
                     <td>{{estudiante.email}}</td>
                     <td>{{estudiante.numero_identificacion}}</td>
-                    {% for carrera in estudiante.carreras %}
-                    <td>{{ carrera.nombre }}</td>
-                    {% endfor %}
+                    <td>{{estudiante.carreras[0].nombre }}</td>
                 </tr>
                 {% endfor %}
             </table>

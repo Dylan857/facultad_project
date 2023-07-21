@@ -17,12 +17,11 @@
 <p style="text-align: left;"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Imagen Unibarranquilla" width="0" height="0" /></p>
 <p style="text-align: center;">CONSULTA ESTUDIANTES</p>
 <hr />
-<p style="text-align: left;">Nombre del docente: {{nombre_docente}}</p> <p>Programa: {{programa}}</p>
-<hr />
 <table class="table table-bordered border-dark">
 <tbody>
         <tr>
         <td><b>No.</b></td>
+        <td><b>Nombre docente</b></td>
         <td><b>Numero de identificacion estudiantes</b></td>
         <td><b>Tema desarrollado</b></td>
         <td><b>Modulo</b></td>
@@ -33,7 +32,8 @@
         <tr>
         {% for tutoria in tutorias %}
         <td>{{ loop.index }}</td>
-        
+        <td>{{tutoria.docente.nombre}}</td>
+
         {% if tutoria.estudiantes|length < 2 %}
         <td>
             {{tutoria.estudiantes[0].numero_identificacion}}
@@ -45,13 +45,8 @@
             {% endfor %}
         </td>
         {% endif %}
-
         <td>{{tutoria.tema_desarrollar}}</td>
-        
-        {% for asignatura in tutoria.asignatura %}
-        <td>{{asignatura.nombre}}</td>
-        {% endfor %}
-
+        <td>{{tutoria.asignatura.nombre}}</td>
         <td>Virtual</td>
         <td>{{tutoria.fecha}}</td>
         <td>{{tutoria.hora_inicio}} - {{tutoria.hora_fin}}</td>
