@@ -11,6 +11,7 @@ from Json.jwt_class import JWT
 from sqlalchemy.exc import IntegrityError
 import random
 from sqlalchemy import and_
+from email.utils import formataddr
 
 db = Database()
 
@@ -146,7 +147,7 @@ class UsuarioRepoImpl(UsuarioRepo):
         
     def enviar_email(self, email, codigo_verificacion, nombre):
         mail = current_app.extensions['mail']
-        msg = Message("Código de verificación", sender="tutoriasingenierias@gmail.com", recipients=[email])
+        msg = Message("Código de verificación", sender=formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[email])
         msg.html = render_template("codigo_verificacion.html", nombre = nombre, codigo_verificacion = codigo_verificacion)
         mail.send(msg)
 
@@ -165,7 +166,7 @@ class UsuarioRepoImpl(UsuarioRepo):
             session.commit()
 
             mail = current_app.extensions['mail']
-            msg = Message("Registro exitoso", sender="tutoriasingenierias@gmail.com", recipients=[usuario_activado.email])
+            msg = Message("Registro exitoso", sender=formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[usuario_activado.email])
             msg.html = render_template("registro_exitoso.html", nombre = usuario_activado.nombre)
             mail.send(msg)
             session.close()
