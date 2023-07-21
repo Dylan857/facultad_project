@@ -25,7 +25,7 @@ def reports_tutoria(id_tutoria):
         pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
         response = make_response(pdf)
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'inline; filename=reporte_tutoria{tutoria["fecha"]}.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=reporte_tutoria/{tutoria["fecha"]}.pdf'
         return response
     else:
         response_not_found = {
@@ -43,7 +43,7 @@ def find_tutoria_between_dates(fecha_inicio, fecha_final):
         pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
         response = make_response(pdf)
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'inline; filename=reporte_tutoria.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=reporte_tutoria.pdf'
         return response
     else:
         response_not_found = {
@@ -62,7 +62,7 @@ def find_tutoria_between_dates_docente(fecha_inicio, fecha_final, documento_doce
         pdf = HTML(string=rendered).write_pdf(stylesheets=[CSS(string='@page { size: A2;')])
         response = make_response(pdf)
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'inline; filename=reporte_tutoria.pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=reporte_tutoria.pdf'
         return response
     else:
         response_not_found = {
