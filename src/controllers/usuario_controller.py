@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from service.usuario_service import UsuarioService
 from repository.repository_impl.usuario_repo_impl import UsuarioRepoImpl
 from flask_jwt_extended import jwt_required
@@ -155,3 +155,49 @@ def get_users_docente():
     else:
         response['message'] = "No hay resultados a mostrar"
     return jsonify(response)
+
+
+@usuario.route("/generate_code_change_password", methods = ['POST'])
+def change_password_generate_code():
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    data = request.get_json()
+    email = data.get('email')
+
+    generate_code = usuario_service.change_password_generate_code(email)
+    if generate_code:
+        return jsonify(response)
+    else:
+        response['status_code'] = 404
+        response['message'] = "Usuario no registrado o inactivo"
+        return jsonify(response), 404
+    
+
+@usuario.route("/change_password", methods = ['POST'])
+def change_password():
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    data = request.get_json()
+    codigo = data.get('codigo')
+    new_password = data.get('new_password')
+
+    password_change = usuario_service.change_password(codigo, new_password)
+    
+    if password_change == True:
+        return jsonify(response)
+    elif password_change:
+        response['status_code'] = 400
+        response['message'] = password_change
+        return jsonify(response), 400
+    else:
+        response['status_code'] = 400
+        response['message'] = "Codigo no valido"
+        return jsonify(response), 400
