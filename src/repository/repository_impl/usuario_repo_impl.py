@@ -1,6 +1,7 @@
 from flask import current_app, render_template
 from flask_mail import Message
 from repository.repository_interface.usuario_repo import UsuarioRepo
+from models.cambio_clave_class import CambioClave
 from models.usuarios_class import Usuario
 from models.roles_class import Rol
 from models.asignatura_class import Asignatura
@@ -186,7 +187,43 @@ class UsuarioRepoImpl(UsuarioRepo):
             return access_token
         else:
             return False
+        
+    def change_password_generate_code(self, email):
+        session = db.get_session()
+        usuario = session.query(Usuario).filter(and_(Usuario.email == email, Usuario.activo == 1)).first()
+        if usuario:
+            codigo_verificacion = self.generar_codigo()
+            change_password_code = CambioClave(usuario.id, codigo_verificacion)
+            session.add(change_password_code)
+            session.commit()
 
+            mail = current_app.extensions['mail']
+            msg = Message("Código de verificación cambio de contraseña", sender=formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[usuario.email])
+            msg.html = render_template("codigo_verificacion_password.html", nombre = usuario.nombre, codigo_verificacion = codigo_verificacion)
+            mail.send(msg)
+            session.close()
+            return True
+        else:
+            return False
+        
+    def change_password(self, codigo, new_password):
+        session = db.get_session()
+        codigo_used = session.query(CambioClave).filter(and_(CambioClave.codigo_verificacion == codigo, CambioClave.used == 1)).first()
+        if codigo_used:
+            error = "El codigo anterior ya se uso"
+            return error
+        else:
+            codigo_found = session.query(CambioClave).filter(and_(CambioClave.codigo_verificacion == codigo, CambioClave.used == 0)).first()
+            if codigo_found:
+                usuario = session.query(Usuario).filter(and_(Usuario.id == codigo_found.usuario_id, Usuario.activo == 1)).first()
+                usuario.password = self.hashear_password(new_password)
+                codigo_found.used = 1
+                session.commit()
+
+                session.close()
+                return True
+            else:
+                return False
 
     def hashear_password(self, password):
         return pbkdf2_sha256.hash(password)

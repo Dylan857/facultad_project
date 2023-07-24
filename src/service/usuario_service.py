@@ -49,3 +49,9 @@ class UsuarioService:
     
     def find_user(self, numero_documento):
         return self.usuario_repository.find_user(numero_documento)
+    
+    def change_password_generate_code(self, email):
+        return self.usuario_repository.change_password_generate_code(email)
+    
+    def change_password(self, codigo, new_password):
+        return self.usuario_repository.change_password(codigo, new_password)
