@@ -33,7 +33,7 @@ def create_user():
         numero_identificacion = data.get('numero_identificacion')
         carrera = data.get('carrera')
         password = data.get('password')
-        rol = data.get('rol')
+        rol = data.get('roles')
         asignaturas = data.get('asignaturas')
         programa = data.get('programa')
 

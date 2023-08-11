@@ -7,13 +7,13 @@ json_schema = {
         "tipo_identificacion" : {"type" : "string", "maxLength" : 5, "pattern": "^(?!\\s*$).+"},
         "numero_identificacion" : {"type" : "string", "pattern": "^[0-9]+$", "maxLength" : 15},
         "password" : {"type" : "string", "maxLength" : 255},
-        "rol" : {
+        "roles" : {
             "type" : "array",
             "items" : {"type" : "string"},
             "minItems" : 1
         }
     },
-    "required" : ["nombre", "celular", "email", "tipo_identificacion", "numero_identificacion", "password", "rol"]
+    "required" : ["nombre", "celular", "email", "tipo_identificacion", "numero_identificacion", "password", "roles"]
 }
 
 json_schema_solicitud = {
