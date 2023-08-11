@@ -243,7 +243,7 @@ def update_user(id):
         tipo_identificacion = data.get('tipo_identificacion')
         numero_identificacion = data.get('numero_identificacion')
         carrera = data.get('carrera')
-        rol = data.get('rol')
+        rol = data.get('roles')
         asignaturas = data.get('asignaturas')
         programa = data.get('programa')
             
@@ -260,7 +260,6 @@ def update_user(id):
             response['message'] = "Hubo un error al momento de crear el usuario"
             return jsonify(response), 400
     except IntegrityError as e:
-        print(str(e))
         respuesta = str(e).split(" ")
         if respuesta[24] == '"celular_unique"\nDETAIL:':
             response['status_code'] = 400

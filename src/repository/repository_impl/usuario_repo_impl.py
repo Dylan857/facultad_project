@@ -162,12 +162,10 @@ class UsuarioRepoImpl(UsuarioRepo):
         try:
 
             session = db.get_session()
-
             user_found = session.query(Usuario).filter(and_(Usuario.numero_identificacion == user_id, Usuario.activo == 1)).first()
 
             if user_found:   
                 roles = self.validar_roles(rol)
-                user_found.roles.clear()
 
                 if roles:
                     return roles
@@ -229,6 +227,7 @@ class UsuarioRepoImpl(UsuarioRepo):
                     return True
                 
                 elif "ROLE_ADMIN" in rol:
+                    print("Llegue hasta aqui")
 
                     user_found.nombre = nombre
                     user_found.email = email
