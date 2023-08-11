@@ -158,6 +158,160 @@ class UsuarioRepoImpl(UsuarioRepo):
         else:
             return False
         
+    def update_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, rol, asignaturas, programa, user_id):
+        try:
+
+            session = db.get_session()
+
+            user_found = session.query(Usuario).filter(and_(Usuario.id == user_id, Usuario.activo == 1)).first()
+
+            if user_found:   
+                roles = self.validar_roles(rol)
+                user_found.roles.clear()
+
+                if roles:
+                    return roles
+
+                if "ROLE_ADMIN" in rol and "ROLE_ESTUDIANTE" in rol:
+                    user_found.nombre = nombre
+                    user_found.email = email
+                    user_found.celular = celular
+                    user_found.tipo_identificacion = tipo_identificacion
+                    user_found.numero_identificacion = numero_identificacion
+                    user_found.carreras.clear()
+                    
+                    carrera_encontrada = session.query(Carrera).filter(and_(Carrera.id == carrera, Carrera.activo == 1)).first()
+
+                    if carrera_encontrada:
+                        user_found.carreras.append(carrera_encontrada)
+                    else:
+                        error = "Carrera no encontrada"
+                        return error
+                    
+                    for role in rol:
+                        rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
+                        user_found.roles.append(rol_encontrado)
+                    
+                    session.commit()
+                    session.close()
+                    return True
+                
+                elif "ROLE_ADMIN" in rol and "ROLE_DOCENTE" in rol:
+                    user_found.nombre = nombre
+                    user_found.email = email
+                    user_found.celular = celular
+                    user_found.tipo_identificacion = tipo_identificacion
+                    user_found.numero_identificacion = numero_identificacion
+                    user_found.programas.clear()
+
+                    programa_encontrado = session.query(Carrera).filter(and_(Carrera.id == programa, Carrera.activo == 1)).first()
+                    
+                    if programa_encontrado:
+                        user_found.programas.append(programa_encontrado)
+                    else:
+                        error = "Programa no encontrado"
+                        return error
+                    
+                    for role in rol:
+                        rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
+                        user_found.roles.append(rol_encontrado)
+
+                    validar_asignatura = self.validar_asignaturas(asignaturas)
+                    if validar_asignatura:
+                        return validar_asignatura
+
+                    for asignatura in asignaturas:
+                        asignatura_encontrada = session.query(Asignatura).filter(and_(Asignatura.id == asignatura, Asignatura.activo == 1)).first()
+                        user_found.asignaturas.append(asignatura_encontrada)
+                    
+                    session.commit()
+                    session.close()
+                    return True
+                
+                elif "ROLE_ADMIN" in rol:
+
+                    user_found.nombre = nombre
+                    user_found.email = email
+                    user_found.celular = celular
+                    user_found.tipo_identificacion = tipo_identificacion
+                    user_found.numero_identificacion = numero_identificacion
+
+                    for role in rol:
+                        rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
+                        user_found.roles.append(rol_encontrado)
+                    session.commit()
+                    session.close()
+                    return True
+                
+                elif "ROLE_ESTUDIANTE" in rol:
+                    user_found.nombre = nombre
+                    user_found.email = email
+                    user_found.celular = celular
+                    user_found.tipo_identificacion = tipo_identificacion
+                    user_found.numero_identificacion = numero_identificacion
+                    user_found.carreras.clear()
+
+                    carrera_encontrada = session.query(Carrera).filter(and_(Carrera.id == carrera, Carrera.activo == 1)).first()
+                    if carrera_encontrada:
+                        user_found.carreras.append(carrera_encontrada)
+                    else:
+                        error = "Carrera no encontrada"
+                        return error
+
+                    for role in rol:
+                        rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
+                        user_found.roles.append(rol_encontrado)
+                    session.commit()
+                    session.close()
+                    return True
+                
+                elif "ROLE_DOCENTE" in rol:
+
+                    user_found.nombre = nombre
+                    user_found.email = email
+                    user_found.celular = celular
+                    user_found.tipo_identificacion = tipo_identificacion
+                    user_found.numero_identificacion = numero_identificacion
+                    user_found.programas.clear()
+
+                    programa_encontrado = session.query(Carrera).filter(and_(Carrera.id == programa, Carrera.activo == 1)).first()
+                    
+                    if programa_encontrado:
+                        user_found.programas.append(programa_encontrado)
+                    else:
+                        error = "Programa no encontrado"
+                        return error
+
+                    for role in rol:
+                        rol_encontrado = session.query(Rol).filter(Rol.rol == role).first()
+                        user_found.roles.append(rol_encontrado)
+
+                    validar_asignatura = self.validar_asignaturas(asignaturas)
+                    if validar_asignatura:
+                        return validar_asignatura
+                
+                    for asignatura in asignaturas:
+                        asignatura_encontrada = session.query(Asignatura).filter(and_(Asignatura.id == asignatura, Asignatura.activo == 1)).first()
+                        user_found.asignaturas.append(asignatura_encontrada) 
+                    
+                    session.commit()
+                    session.close()
+                    return True
+            else:
+                return False
+        except IntegrityError as e:
+            raise e
+
+    def inactive_user(self, user_id):
+        session = db.get_session()
+        usuario = session.query(Usuario).filter(and_(Usuario.id == user_id, Usuario.activo == 1)).first()
+
+        if usuario:
+            usuario.activo = 0
+            session.commit()
+            session.close()
+            return True
+        
     def enviar_email(self, email, codigo_verificacion, nombre):
         mail = current_app.extensions['mail']
         msg = Message("Código de verificación", sender=formataddr(("Tutorias ingenieria", "tutoriasingenierias@gmail.com")), recipients=[email])

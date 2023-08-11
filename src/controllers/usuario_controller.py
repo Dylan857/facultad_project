@@ -4,6 +4,7 @@ from repository.repository_impl.usuario_repo_impl import UsuarioRepoImpl
 from flask_jwt_extended import jwt_required
 from validate.JWT_validate import JWTValidate
 from Json.jwt_class import JWT
+from sqlalchemy.exc import IntegrityError
 
 usuario = Blueprint('usuario', __name__, url_prefix="/usuario")
 usuario_repository = UsuarioRepoImpl()
@@ -225,3 +226,51 @@ def delete_usuario(id):
         response['status_code'] = 400
         response['message'] = "Usuario ya inactivo o no encontrado"
         return jsonify(response), 400
+
+@usuario.route("/update_usuario/<string:id>", methods = ['PUT'])   
+def update_user(id):
+
+    try:
+        response = {
+            'status_code' : 200,
+            'message' : 'OK',
+            'codigo_access' : []
+        }
+        data = request.get_json()
+        nombre = data.get('nombre')
+        email = data.get('email')
+        celular = data.get('celular')
+        tipo_identificacion = data.get('tipo_identificacion')
+        numero_identificacion = data.get('numero_identificacion')
+        carrera = data.get('carrera')
+        rol = data.get('rol')
+        asignaturas = data.get('asignaturas')
+        programa = data.get('programa')
+            
+        update_user = usuario_service.update_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, rol, asignaturas, programa, id)
+
+        if update_user == True:
+            return jsonify(response)
+        elif update_user:
+            response['status_code'] = 400
+            response['message'] = update_user
+            return jsonify(response), 400
+        else:
+            response['status_code'] = 400
+            response['message'] = "Hubo un error al momento de crear el usuario"
+            return jsonify(response), 400
+    except IntegrityError as e:
+        print(str(e))
+        respuesta = str(e).split(" ")
+        if respuesta[24] == '"celular_unique"\nDETAIL:':
+            response['status_code'] = 400
+            response['message'] = "Celular ya en uso"
+            return jsonify(response), 400
+        elif respuesta[24] == '"email_unique"\nDETAIL:':
+            response['status_code'] = 400
+            response['message'] = "Email ya en uso"
+            return jsonify(response), 400
+        elif respuesta[24] == '"unica"\nDETAIL:':
+            response['status_code'] = 400
+            response['message'] = "Numero de documento ya en uso"
+            return jsonify(response), 400

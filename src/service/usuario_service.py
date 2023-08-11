@@ -58,3 +58,6 @@ class UsuarioService:
     
     def inactive_user(self, user_id):
         return self.usuario_repository.inactive_user(user_id)
+    
+    def update_user(self, nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, rol, asignaturas, programa, user_id):
+        return self.usuario_repository.update_user(nombre, email, celular, tipo_identificacion, numero_identificacion, carrera, rol, asignaturas, programa, user_id)
