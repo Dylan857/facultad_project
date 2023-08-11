@@ -163,7 +163,7 @@ class UsuarioRepoImpl(UsuarioRepo):
 
             session = db.get_session()
 
-            user_found = session.query(Usuario).filter(and_(Usuario.id == user_id, Usuario.activo == 1)).first()
+            user_found = session.query(Usuario).filter(and_(Usuario.numero_identificacion == user_id, Usuario.activo == 1)).first()
 
             if user_found:   
                 roles = self.validar_roles(rol)
