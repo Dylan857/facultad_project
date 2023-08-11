@@ -301,7 +301,7 @@ class UsuarioRepoImpl(UsuarioRepo):
 
     def inactive_user(self, user_id):
         session = db.get_session()
-        usuario = session.query(Usuario).filter(and_(Usuario.id == user_id, Usuario.activo == 1)).first()
+        usuario = session.query(Usuario).filter(and_(Usuario.numero_identificacion == user_id, Usuario.activo == 1)).first()
 
         if usuario:
             usuario.activo = 0
