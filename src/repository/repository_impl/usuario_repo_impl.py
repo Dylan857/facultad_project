@@ -523,10 +523,7 @@ class UsuarioRepoImpl(UsuarioRepo):
         usuario = session.query(Usuario).filter(and_(Usuario.email == email, Usuario.activo == 1)).first()
         roles_list = []
         for rol in usuario.roles:
-            roles_dict = {
-                'rol' : rol.rol
-            }
-            roles_list.append(roles_dict)
+            roles_list.append(rol.rol)
         session.close()
         return roles_list
     
