@@ -406,11 +406,11 @@ class UsuarioRepoImpl(UsuarioRepo):
 
         for role in roles:
                 
-            if "ROLE_ESTUDIANTE" in role.get('rol'):
+            if "ROLE_ESTUDIANTE" in role:
                 carreras = self.get_carreras(usuario.carreras)
                 usuario_dict['carrera'] = carreras
 
-            if "ROLE_DOCENTE" in role.get('rol'):
+            if "ROLE_DOCENTE" in role:
                 programa = self.get_programa(usuario.programas)
                 asignaturas = self.get_asignaturas(usuario.asignaturas)
                 usuario_dict['programa'] = programa
