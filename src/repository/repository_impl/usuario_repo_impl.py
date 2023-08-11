@@ -227,8 +227,6 @@ class UsuarioRepoImpl(UsuarioRepo):
                     return True
                 
                 elif "ROLE_ADMIN" in rol:
-                    print("Llegue hasta aqui")
-
                     user_found.nombre = nombre
                     user_found.email = email
                     user_found.celular = celular
@@ -436,14 +434,13 @@ class UsuarioRepoImpl(UsuarioRepo):
                 'numero_identificacion' : usuario.numero_identificacion,
                 'roles' : roles
             }
-
             for role in roles:
                 
-                if "ROLE_ESTUDIANTE" in role.get('rol'):
+                if "ROLE_ESTUDIANTE" in role:
                     carreras = self.get_carreras(usuario.carreras)
                     usuario_dict['carrera'] = carreras
 
-                if "ROLE_DOCENTE" in role.get('rol'):
+                if "ROLE_DOCENTE" in role:
                     programa = self.get_programa(usuario.programas)
                     asignaturas = self.get_asignaturas(usuario.asignaturas)
                     usuario_dict['programa'] = programa
@@ -556,7 +553,7 @@ class UsuarioRepoImpl(UsuarioRepo):
     def get_roles_by_usuario(self, roles):
         roles_list = []
         for rol in roles:
-            roles_list.append(rol.to_dict())
+            roles_list.append(rol.rol)
         return roles_list
     
     def get_carreras(self, carreras):
