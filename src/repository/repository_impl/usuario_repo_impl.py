@@ -543,9 +543,9 @@ class UsuarioRepoImpl(UsuarioRepo):
             'roles' : roles_usuario
         }
 
-        if any("ROLE_ESTUDIANTE" in rol.get('rol') for rol in roles_usuario):
+        if any("ROLE_ESTUDIANTE" in rol for rol in roles_usuario):
             usuario_dict['carrera'] = self.get_carreras(usuario.carreras)
-        elif any("ROLE_DOCENTE" in rol.get('rol') for rol in roles_usuario):
+        elif any("ROLE_DOCENTE" in rol for rol in roles_usuario):
             usuario_dict['asignaturas'] = self.get_asignaturas(usuario.asignaturas)
         session.close()
         return usuario_dict
