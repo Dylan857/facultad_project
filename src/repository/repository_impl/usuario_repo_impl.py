@@ -145,6 +145,18 @@ class UsuarioRepoImpl(UsuarioRepo):
                 return True
         except IntegrityError as e:
             raise e
+
+    def inactive_user(self, user_id):
+        session = db.get_session()
+        usuario = session.query(Usuario).filter(and_(Usuario.id == user_id, Usuario.activo == 1)).first()
+
+        if usuario:
+            usuario.activo = 0
+            session.commit()
+            session.close()
+            return True
+        else:
+            return False
         
     def enviar_email(self, email, codigo_verificacion, nombre):
         mail = current_app.extensions['mail']

@@ -201,3 +201,27 @@ def change_password():
         response['status_code'] = 400
         response['message'] = "Codigo no valido"
         return jsonify(response), 400
+    
+@usuario.route("/delete_usuario/<string:id>", methods = ['DELETE'])
+@jwt_required()
+def delete_usuario(id):
+    
+    response = {
+        'status_code' : 200,
+        'message' : 'OK',
+        'datos' : []
+    }
+
+    current_user = JWT.get_current_user()
+    token = JWTValidate.validar_token_admin(current_user)
+    if token:
+        return jsonify(token)
+
+    usuario_delete = usuario_service.inactive_user(id)
+
+    if usuario_delete:
+        return jsonify(response)
+    else:
+        response['status_code'] = 400
+        response['message'] = "Usuario ya inactivo o no encontrado"
+        return jsonify(response)

@@ -55,3 +55,6 @@ class UsuarioService:
     
     def change_password(self, codigo, new_password):
         return self.usuario_repository.change_password(codigo, new_password)
+    
+    def inactive_user(self, user_id):
+        return self.usuario_repository.inactive_user(user_id)
