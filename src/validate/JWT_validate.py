@@ -17,7 +17,7 @@ class JWTValidate:
         }
 
         usuario_roles = usuario_service.get_roles(current_user)
-        if any("ROLE_ESTUDIANTE" in rol.get('rol') or "ROLE_ADMIN" in rol.get('rol') for rol in usuario_roles):
+        if any("ROLE_ESTUDIANTE" in rol or "ROLE_ADMIN" in rol for rol in usuario_roles):
             pass
         else:
             return response
@@ -31,7 +31,7 @@ class JWTValidate:
             'datos' : []
         }
         usuario_roles = usuario_service.get_roles(current_user)
-        if any("ROLE_DOCENTE" in rol.get('rol') or "ROLE_ADMIN" in rol.get('rol') for rol in usuario_roles):
+        if any("ROLE_DOCENTE" in rol or "ROLE_ADMIN" in rol for rol in usuario_roles):
             pass
         else:
             return response
@@ -46,7 +46,7 @@ class JWTValidate:
         }
 
         usuario_roles = usuario_service.get_roles(current_user)
-        if any("ROLE_ADMIN" in rol.get('rol') for rol in usuario_roles):
+        if any("ROLE_ADMIN" in rol for rol in usuario_roles):
             pass
         else:
             return response
@@ -60,7 +60,7 @@ class JWTValidate:
         }
 
         usuario_roles = usuario_service.get_roles(current_user)
-        if any("ROLE_ADMIN" in rol.get('rol') or "ROLE_ESTUDIANTE" in rol.get('rol') or "ROLE_DOCENTE" in rol.get('rol') for rol in usuario_roles):
+        if any("ROLE_ADMIN" in rol or "ROLE_ESTUDIANTE" in rol or "ROLE_DOCENTE" in rol for rol in usuario_roles):
             pass
         else:
             return response
