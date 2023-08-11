@@ -224,4 +224,4 @@ def delete_usuario(id):
     else:
         response['status_code'] = 400
         response['message'] = "Usuario ya inactivo o no encontrado"
-        return jsonify(response)
+        return jsonify(response), 400
